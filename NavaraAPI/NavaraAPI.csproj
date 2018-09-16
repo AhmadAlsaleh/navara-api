@@ -5,14 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.1.2" />
     <PackageReference Include="Ninject" Version="3.3.4" />
-    <PackageReference Include="SmartLifeLtdWeb" Version="1.0.2.46" />
+    <PackageReference Include="SmartLifeLtdWeb" Version="1.0.2.64" />
+    <PackageReference Include="Twilio" Version="5.16.4" />
   </ItemGroup>
 
   <ItemGroup>

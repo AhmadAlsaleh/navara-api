@@ -1,15 +1,23 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NavaraAPI.Models;
+using NavaraAPI.Services;
+using NavaraAPI.ViewModels;
 using SmartLifeLtd;
+using SmartLifeLtd.Classes;
 using SmartLifeLtd.Classes.Attribute;
 using SmartLifeLtd.Data.AspUsers;
+using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Navara;
 using SmartLifeLtd.Enums;
-using SmartLifeLtd.IServices;
+using NavaraAPI.IServices;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -25,43 +33,28 @@ namespace NavaraAPI.Controllers
         /// The manager to work with the sign in process
         /// </summary>
         private SignInManager<ApplicationUser> mSignInManager;
+    
+        private NavaraDbContext _Context { set; get; }
+        private  IHostingEnvironment env { set; get; }
+
         #region Constructer
         /// <summary>
         /// Default constructer
         /// </summary>
-        public UsersController(
+        public UsersController(NavaraDbContext context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IUsersService usersService
+            IUsersService usersService, IHostingEnvironment env
             ) : base(usersService)
         {
+            this.env = env;
+            _Context = context;
             mSignInManager = signInManager;
             mUserManager = userManager;
         }
         #endregion
 
-        #region GET Requests
-        /// <summary>
-        /// Gets all the user in the database
-        /// Will be removed when moving to realase 
-        /// TODO:REMOVE
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        public async Task<IActionResult> GetUsers()
-        {
-            try
-            {
-                //try to add the users
-                return Ok(await mService.GetUsers());
-            }
-            catch (Exception ex)
-            {
-                //if error happend return the exception
-                StatusCode(StatusCodes.Status500InternalServerError, ex);
-                return null;
-            }
-        }
+        #region Account Requests
         /// <summary>
         /// Signs a user out of the application
         /// </summary>
@@ -72,7 +65,6 @@ namespace NavaraAPI.Controllers
             try
             {
                 await mService.SignOut();
-
                 return Ok("User has signOut");
             }
             catch (Exception)
@@ -80,27 +72,7 @@ namespace NavaraAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Could not sign out please try again");
             }
         }
-        /// <summary>
-        /// Gets the user informations that is saved in the database
-        /// </summary>
-        /// <returns></returns>
-        [AuthorizeToken]
-        [HttpGet]
-        public async Task<IActionResult> GetUserInformation()
-        {
-            try
-            {
-                return Ok(await mService.GetUserInformation(HttpContext.User.Identity.Name));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex);
-            }
 
-        }
-        #endregion
-
-        #region POST Requests
         /// <summary>
         /// Registers a new user to the database 
         /// </summary>
@@ -127,12 +99,13 @@ namespace NavaraAPI.Controllers
                         case StationType.Desktop:
                         case StationType.Mobile:
                         default:
-                            result = await mService.RegisterUser(userData);
+                            result = await mService.Register(userData);
                             break;
                     }
+
                     //If the user got added right
-                    if (result is RegisterResultApiModel)
-                        return StatusCode(StatusCodes.Status201Created, result);
+                    if (result is string)
+                        return Json(new { Token = result });
 
                     //Retrun a 500 errro
                     return StatusCode(StatusCodes.Status500InternalServerError, result);
@@ -144,6 +117,7 @@ namespace NavaraAPI.Controllers
             }
             return BadRequest("Invaild information please check the sent information and try again");
         }
+
         /// <summary>
         /// Signs a user in and returns a token
         /// </summary>
@@ -154,88 +128,53 @@ namespace NavaraAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                //The error message that we want to return
-                var errorMessage = "Invaild username or password";
-
-                //Check if the data vided by user is not null
-                if (userData?.UserID == null || string.IsNullOrWhiteSpace(userData.UserID))
-                    return NotFound(errorMessage);
+                if (string.IsNullOrWhiteSpace(userData?.UserID))
+                    return BadRequest("No UserID");
                 try
                 {
-                    //if (await mUserManager.IsEmailConfirmedAsync(await mUserManager.FindByEmailAsync(userData.UsernameOrEmail)))
-                        //Try to sign in the user
-                        var userWithToken = await mService.SignInUser(userData);
-                        //If we recived null then
-                        if (userWithToken == null)
-                            //Return not found
-                            return NotFound(errorMessage);
-
-                        //else return the user with his token
-                        return Ok(userWithToken);
-                    //return StatusCode(StatusCodes.Status406NotAcceptable, "Please confirm email!");
-                }
-                catch (NullReferenceException)
-                {
-                    return StatusCode(StatusCodes.Status404NotFound, errorMessage);
+                    var result = await mService.SignIn(userData);
+                    if (result is string)
+                        return Json(new { Token = result });
+                    return BadRequest(result);
                 }
                 catch (Exception ex)
                 {
-                    return StatusCode(StatusCodes.Status500InternalServerError, ex);
+                    return BadRequest(ex);
                 }
-
             }
             return BadRequest("Invaild information please check the sent information and try again");
         }
-        /// <summary>
-        /// Updates all the user information in the database
-        /// </summary>
-        /// <param name="userInfo">The object that holds the new information</param>
-        /// <returns></returns>
-        [AuthorizeToken]
-        [HttpPost]
-        public async Task<IActionResult> UpdateUserInformation([FromBody]UpdateUserInformationViewModel userInfo)
-        {
-            //Check if the sent model is right 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    await mService.UpdateUserInformation(HttpContext.User.Identity.Name, userInfo);
-                    return Ok();
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
-            }
-            return BadRequest("Invaild information please check the sent information and try again");
 
-        }
-        /// <summary>
-        /// Updates the user image
-        /// </summary>
-        /// <param name="userInfo">The object that holds the new information</param>
-        /// <returns></returns>
         [AuthorizeToken]
-        [HttpPost]
-        public async Task<IActionResult> UpdateUserProfileImage([FromBody]UserfileImageUpdateApiModel data)
+        [HttpGet]
+        public async Task<IActionResult> ChangeLanguage(LanguageChange model)
         {
-            //Check if the sent model is right 
-            if (ModelState.IsValid)
+            try
             {
-                try
+                var userID = HttpContext.User.Identity.Name;
+                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+                ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+                Account account = _Context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
+                if (user == null || account == null) return null;
+                if (_Context.Languages.Any(x => x.ID == model.LanguageID))
                 {
-                    //Tarek await mService.ChangeUserfilePictureBase64String(HttpContext.User.Identity.Name, data.Image);
-                    return Ok();
+                    account.LanguageID = model.LanguageID;
+                    var path = Path.Combine(this.env.WebRootPath, "Languages/English.json");
+                    if (!System.IO.File.Exists(path)) return BadRequest();
+                    using (StreamReader reader = new StreamReader(path))
+                    {
+                        _Context.SaveChanges();
+                        return Json(reader.ReadToEnd());
+                    }
                 }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError, "Could not sign out please try again");
             }
-            return BadRequest("The send data was not well formated!");
-
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Could not sign out please try again");
+            }
         }
+
         /// <summary>
         /// Changes the user password in the database
         /// </summary>
@@ -247,46 +186,119 @@ namespace NavaraAPI.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await mService.ChangeUserPassword(
-                    new ChangePsswordViewModel
-                    {
-                        UserID = HttpContext.User.Identity.Name,
-                        OldPassword = model.OldPassword,
-                        NewPassword = model.NewPassword
-                    });
+                var result = await mService.ChangePassword(HttpContext.User.Identity.Name, model.OldPassword, model.NewPassword);
+                if ((result as IdentityResult).Succeeded) return Ok(result);
+                return StatusCode(StatusCodes.Status406NotAcceptable, result);
+            }
+            return BadRequest("Invalide data!");
+        }
 
-                //If the user got added right
-                if (result is Boolean)
+        /// <summary>
+        /// Changes the user password in the database when the user forgetted it
+        /// </summary>
+        /// <param name="newPassword">The new password to change</param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> ChangeForgettedPassword([FromBody] ForgettedPasswordChange model)
+        {
+            if (ModelState.IsValid)
+            {
+                var userID = model.UserID;
+                ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+                if (user == null) return null;
+                string token = await mUserManager.GeneratePasswordResetTokenAsync(user);
+                var result = await mUserManager.ResetPasswordAsync(user, token, model.NewPassword);
+                if (result.Succeeded)
                     return StatusCode(StatusCodes.Status200OK, result);
-
                 //Retrun a 500 errro
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
             }
             return BadRequest("Invalide data!");
         }
-        #endregion
 
-        #region Helper class
         /// <summary>
-        /// A class for the password change action parameter
+        /// Changes the user password in the database when the user forgetted it
         /// </summary>
-        public class PasswordChange
+        /// <param name="newPassword">The new password to change</param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IActionResult> ResetPasswordOrder([FromBody] ResetPasswordOrder model)
         {
-            #region perties
-            /// <summary>
-            /// The old password of the user
-            /// </summary>
-            public string OldPassword { get; set; }
-            /// <summary>
-            /// The new user password
-            /// </summary>
-            public string NewPassword { get; set; }
-            #endregion
+            if (ModelState.IsValid)
+            {
+                var userID = model.UserID;
+                ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+                if (user == null) return null;
+                string token = user.GenerateJwtToken(IoCCore.AppViewModel);
+                if (user.UserName.IsValidEmail())
+                {
+                    EmailService.SendResetEmail(user.UserName, user.UserName, token);
+                }
+                else if (user.UserName.IsValidPhone())
+                {
+                    SMSService.SendResetSMS(user.UserName, user.UserName, token);
+                }
+                else return BadRequest("Unvalid email or password");
+                return Ok();
+            }
+            return BadRequest("Invalide data!");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ResetPassword(string Token, string userID)
+        {
+            if (userID == null) return BadRequest("User Id is not related to any Account");
+            ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+            if (user == null) return null;
+            string token = await mUserManager.GeneratePasswordResetTokenAsync(user);
+            var result = await mUserManager.ResetPasswordAsync(user, token, "P@ssw0rd");
+            return Content("Reset Successfuly! your new Password is: P@ssw0rd");
+        }
+
+        /// <summary>
+        /// Changes the user password in the database
+        /// </summary>
+        /// <param name="newPassword">The new password to change</param>
+        /// <returns></returns>
+        [AuthorizeToken]
+        [HttpPost]
+        public async Task<IActionResult> ChangeForgettedPassword([FromBody] PasswordChange model)
+        {
+            if (ModelState.IsValid)
+            {
+                var userID = HttpContext.User.Identity.Name;
+                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+                ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+                if (user == null) return null;
+                string token = await mUserManager.GeneratePasswordResetTokenAsync(user);
+                var result = await mUserManager.ResetPasswordAsync(user, token, model.NewPassword);
+                if (result.Succeeded)
+                    return StatusCode(StatusCodes.Status200OK, result);
+                //Retrun a 500 errro
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+            return BadRequest("Invalide data!");
+        }
+
+        /// <summary>
+        /// Changes the user password in the database
+        /// </summary>
+        /// <param name="newPassword">The new password to change</param>
+        /// <returns></returns>
+        [AuthorizeToken]
+        [HttpPost]
+        public async Task<IActionResult> ConfirmAccount([FromBody] ConfirmAccountModel model)
+        {
+            var userID = HttpContext.User.Identity.Name;
+            if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+            var result = await mService.ConfirmAccount(userID, model.Token);
+            if (result == false) return StatusCode(StatusCodes.Status406NotAcceptable);
+            return NoContent();
+        }
+       
         #endregion
 
         #region External Login
-
         [HttpPost]
         public IActionResult ExternalLogin(string provider)
         {
@@ -304,24 +316,22 @@ namespace NavaraAPI.Controllers
             var signinResult = await mSignInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (signinResult.Succeeded)
             {
-                var signedInuser = await mService.GetAccountByEmailOrUsername(email);
+                var signedInuser = await mService.GetAccountByUserID(email);
 
                 return Ok(new SignInResultUserDataApiModel
                 {
                     Username = signedInuser.User.UserName,
-                    FirstName = signedInuser.FirstName,
-                    LastName = signedInuser.LastName,
+                    FirstName = signedInuser.Name,
                     Email = signedInuser.User.Email,
-                    Token = signedInuser.User.GenerateJwtToken(IoCCore.AppViewModel),
-                    ImagePath = signedInuser.ImagePath
+                    Token = signedInuser.User.GenerateJwtToken(IoCCore.AppViewModel)
                 });
             }
             Account acc = new Account
             {
-                FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName),
-                LastName = info.Principal.FindFirstValue(ClaimTypes.Surname),
+                Name = info.Principal.FindFirstValue(ClaimTypes.GivenName),
+                //LastName = info.Principal.FindFirstValue(ClaimTypes.Surname),
                 CreationDate = DateTime.UtcNow,
-                ImagePath = "/images/profile-pic.png",
+                CashBack = 0
             };
 
             var user = new ApplicationUser
@@ -339,11 +349,9 @@ namespace NavaraAPI.Controllers
                     return Ok(new SignInResultUserDataApiModel
                     {
                         Username = user.UserName,
-                        FirstName = acc.FirstName,
-                        LastName = acc.LastName,
-                        Email = user.Email,
+                        FirstName = acc.Name,
+                        Email = user.Email
                         //Token = acc.GenerateJwtToken(),
-                        ImagePath = acc.ImagePath
                     });
                 }
             }
@@ -355,6 +363,5 @@ namespace NavaraAPI.Controllers
             return StatusCode(StatusCodes.Status500InternalServerError, errors);
         }
         #endregion
-
     }
 }

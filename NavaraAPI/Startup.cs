@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using SmartLifeLtd.IServices;
+using NavaraAPI.IServices;
 using NavaraAPI.Models;
 using NavaraAPI.Services;
 using SmartLifeLtd.Data.AspUsers;
@@ -34,6 +34,7 @@ namespace NavaraAPI
         public void ConfigureServices(IServiceCollection services)
         {
             IConfigurationSection DBConf = Configuration.GetSection("DBOnline");
+            IConfigurationSection DBLogConf = Configuration.GetSection("DBLogOnline");
             ConnectionSetting connectionString = new ConnectionSetting(
                 DBConf.GetValue<string>("ServerName"),
                 DBConf.GetValue<string>("DatabaseName"),
@@ -41,7 +42,15 @@ namespace NavaraAPI
                 DBConf.GetValue<string>("Username"),
                 DBConf.GetValue<string>("Password")
             );
+            ConnectionSetting logConnectionString = new ConnectionSetting(
+                 DBLogConf.GetValue<string>("ServerName"),
+                 DBLogConf.GetValue<string>("DatabaseName"),
+                 DBLogConf.GetValue<string>("Port"),
+                 DBLogConf.GetValue<string>("Username"),
+                 DBLogConf.GetValue<string>("Password")
+             );
             services.AddDbContext<NavaraDbContext>(options => options.UseSqlServer(connectionString.ToString()));
+            services.AddDbContext<LogDbContext>(options => options.UseSqlServer(logConnectionString.ToString()));
             NavaraDbContext.DEFAULT_CONNECTION_STRING = connectionString.ToString();
 
             services.AddScoped<IUsersService, UsersService>();
@@ -60,9 +69,9 @@ namespace NavaraAPI
                            .AddDefaultTokenProviders();
 
             //Configure IoC values
-            IoCCore.AppViewModel.Audience = Configuration["Jwt:Audience"];
-            IoCCore.AppViewModel.Issuer = Configuration["Jwt:Issuer"];
-            IoCCore.AppViewModel.SecretKey = Configuration["Jwt:SecretKey"];
+            JwtService.Audience = IoCCore.AppViewModel.Audience = Configuration["Jwt:Audience"];
+            JwtService.Issuer = IoCCore.AppViewModel.Issuer = Configuration["Jwt:Issuer"];
+            JwtService.SecretKey = IoCCore.AppViewModel.SecretKey = Configuration["Jwt:SecretKey"];
 
 
             //Add the token based authentication
@@ -109,7 +118,7 @@ namespace NavaraAPI
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseStaticFiles();
             app.UseMvc();
             Context.Database.Migrate();
 

@@ -5,40 +5,40 @@ using System.Threading.Tasks;
 
 namespace NavaraAPI.ViewModels
 {
-    public class ItemModel
+    public class OfferModel
     {
         public Guid ID { set; get; }
-        public string Name { get; set; }
-        public int? Quantity { get; set; }
+        public string Title { get; set; }
         public double? Price { get; set; }
         public string Description { get; set; }
         public string ShortDescription { get; set; }
-        public bool? IsEnable { set; get; }
+        public string OfferType { get; set; }
+        public double? Discount { get; set; }
+        public bool? IsActive { set; get; }
         public string ThumbnailImagePath { set; get; }
-        public Guid? ItemCategoryID { get; set; }
+        public Guid? ItemID { get; set; }
     }
-    public class ItemFullModel
+    public class OfferFullModel
     {
         public Guid ID { set; get; }
-        public string Name { get; set; }
-        public int? Quantity { get; set; }
+        public string Title { get; set; }
         public double? Price { get; set; }
         public string Description { get; set; }
         public string ShortDescription { get; set; }
-        public bool? IsEnable { set; get; }
+        public string OfferType { get; set; }
+        public double? Discount { get; set; }
+        public bool? IsActive { set; get; }
         public string ThumbnailImagePath { set; get; }
-        public string ItemCategory { set; get; }
-        public Guid? ItemCategoryID { get; set; }
-        public List<string> ItemImages { set; get; }
+        public Guid? ItemID { get; set; }
+        public List<string> OfferImages { set; get; }
+        public List<Guid> OfferItems { set; get; }
     }
-    public class ItemBasicModel
+    public class OfferBasicModel
     {
         public Guid ID { set; get; }
-        public string Name { get; set; }
-        public double? Price { set; get; }
-        public int? Quantity { set; get; }
-        public string ItemCategory { set; get; }
+        public string Title { get; set; }
         public string ShortDescription { get; set; }
+        public string OfferType { get; set; }
         public string ThumbnailImagePath { get; set; }
     }
 }

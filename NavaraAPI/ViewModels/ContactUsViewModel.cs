@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace NavaraAPI.ViewModels
 {
-    public class ItemCategoryModel
+    public class ContactUsViewModel
     {
-        public Guid ID { set; get; }
         public string Name { get; set; }
-        public string Description  { get; set; }
-        public string ImagePath { get; set; }
+        public string Email { get; set; }
+        public string Mobile  { get; set; }
+        public string Message { get; set; }
     }
 }

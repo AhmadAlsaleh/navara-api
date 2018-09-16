@@ -10,7 +10,7 @@ using SmartLifeLtd.Data.Tables.Navara;
 
 namespace NavaraAPI.Controllers
 {
-    [Route("[controller]")]
+    [Route("[controller]/[action]")]
     public class ItemCategoriesController : BaseController<ItemCategory>
     {
         public ItemCategoriesController(NavaraDbContext context)
@@ -25,10 +25,12 @@ namespace NavaraAPI.Controllers
             try
             {
                 var data = _context.Set<ItemCategory>().ToList();
-                var json = new JsonResult(data.Select(x => new ItemCategoryViewModel()
+                var json = new JsonResult(data.Select(x => new ViewModels.ItemCategoryModel()
                 {
+                    ID = x.ID,
                     Name = x.Name,
-                    Description = x.Description
+                    Description = x.Description,
+                    ImagePath = x.ImagePath
                 }));
                 return json;
             }
