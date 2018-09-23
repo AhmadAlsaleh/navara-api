@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace NavaraAPI.ViewModels
 {
-    public class CartViewModel : BaseViewModel
+    public class CartViewModel
     {
         public List<CartItemViewModel> Items { get; set; }
         public Guid? AccountID { set; get; }

@@ -38,6 +38,7 @@ namespace NavaraAPI.ViewModels
         public double? Price { set; get; }
         public int? Quantity { set; get; }
         public string ItemCategory { set; get; }
+        public Guid? ItemCategoryID { get; set; }
         public string ShortDescription { get; set; }
         public string ThumbnailImagePath { get; set; }
     }

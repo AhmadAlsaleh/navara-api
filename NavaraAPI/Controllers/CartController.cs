@@ -23,12 +23,14 @@ namespace NavaraAPI.Controllers
         {
 
         }
+
         [AuthorizeToken]
         [HttpPost]
         public async Task<IActionResult> RemoveFromCart([FromBody]CartItemViewModel model)
         {
             try
             {
+                #region Check user
                 var userID = HttpContext.User.Identity.Name;
                 if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
                 ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
@@ -38,18 +40,19 @@ namespace NavaraAPI.Controllers
                     .FirstOrDefault(x => x.ID == user.AccountID);
                 if (user == null || account == null) return null;
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
+                #endregion
 
                 var cartItem = account.Cart?.CartItems.FirstOrDefault(x => x.ItemID == model.ItemID);
                 if (cartItem == null) return NoContent();
 
-                if(cartItem.OfferID != null)
+                if (cartItem.OfferID != null)
                 {
                     var removeItem = _context.Set<CartItem>().Where(x => x.OfferID == cartItem.OfferID);
                     _context.Set<CartItem>().RemoveRange(removeItem);
                 }
                 _context.Set<CartItem>().Remove(cartItem);
                 await _context.SaveChangesAsync();
-                account.Cart.UpdateCartItems();
+                await account.Cart.UpdateCart(_context);
                 return NoContent();
             }
             catch (Exception ex)
@@ -64,17 +67,18 @@ namespace NavaraAPI.Controllers
         {
             try
             {
+                #region Check user
                 var userID = HttpContext.User.Identity.Name;
                 if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-                ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+                ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(x => x.UserName == userID);
                 Account account = _context.Set<Account>()
-                    .Include(x => x.Cart)
-                        .ThenInclude(x => x.CartItems)
-                            .ThenInclude(x => x.Item)
+                    .Include(x => x.Cart).ThenInclude(x => x.CartItems)
                     .FirstOrDefault(x => x.ID == user.AccountID);
                 if (user == null || account == null) return null;
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
+                #endregion
 
+                #region Create cart for the first time
                 if (account.Cart == null)
                 {
                     account.Cart = new Cart()
@@ -84,9 +88,11 @@ namespace NavaraAPI.Controllers
                         LastPurchase = DateTime.Now,
                     };
                 }
+                #endregion
+                
                 #region Add Item
                 var cartItem = account.Cart.CartItems.FirstOrDefault(x => x.ItemID == model.ItemID);
-                if (cartItem == null)
+                if (cartItem == null) // If item is not exist add it
                 {
                     cartItem = (new CartItem()
                     {
@@ -96,9 +102,11 @@ namespace NavaraAPI.Controllers
                     account.Cart.CartItems.Add(cartItem);
                 }
                 cartItem.Quantity = model.Quantity;
+                cartItem.OfferID = null;
                 #endregion
-                
+
                 await _context.SaveChangesAsync();
+                await account.Cart.UpdateCart(_context);
                 return NoContent();
             }
             catch (Exception ex)
@@ -113,17 +121,19 @@ namespace NavaraAPI.Controllers
         {
             try
             {
+                #region Check user
                 var userID = HttpContext.User.Identity.Name;
                 if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
                 ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
                 Account account = _context.Set<Account>()
                     .Include(x => x.Cart)
                         .ThenInclude(x => x.CartItems)
-                            .ThenInclude(x => x.Item)
                     .FirstOrDefault(x => x.ID == user.AccountID);
                 if (user == null || account == null) return null;
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
+                #endregion
 
+                #region Create cart for the first time
                 if (account.Cart == null)
                 {
                     account.Cart = new Cart()
@@ -133,11 +143,10 @@ namespace NavaraAPI.Controllers
                         LastPurchase = DateTime.Now,
                     };
                 }
+                #endregion
 
                 #region Add Offer 
-                var Offer = _context.Set<Offer>()
-                    .Include(x => x.OfferItems)
-                    .Include(x => x.Item)
+                var Offer = _context.Set<Offer>().Include(x => x.OfferItems)
                     .FirstOrDefault(x => x.ID == model.OfferID);
                 OfferType offerType = OfferType.None;
                 Enum.TryParse<OfferType>(Offer.OfferType, out offerType);
@@ -148,69 +157,42 @@ namespace NavaraAPI.Controllers
                     case OfferType.Discount:
                         #region Discount Offer
                         var item = await _context.Set<Item>().FirstOrDefaultAsync(x => x.ID == Offer.ItemID);
-                        var cartItem = account.Cart.CartItems.FirstOrDefault(x => x.ItemID == item.ID && x.OfferID == Offer.ID);
-                        if (cartItem == null)
+                        var cartItem = new CartItem()
                         {
-                            cartItem = (new CartItem()
-                            {
-                                ItemID = item.ID,
-                                CreationDate = DateTime.Now
-                            });
-                            account.Cart.CartItems.Add(cartItem);
-                        }
-                        cartItem.Quantity = model.Quantity;
-                        cartItem.UnitPrice = item.Price;
-                        cartItem.UnitDiscount = Offer.Discount;
-                        cartItem.UnitNetPrice = item.Price - (item.Price * Offer.Discount / 100.0);
-                        cartItem.Total = cartItem.Quantity * cartItem.UnitNetPrice;
-                        cartItem.IsFree = false;
-                        cartItem.OfferID = Offer.ID;
+                            ItemID = item.ID,
+                            CreationDate = DateTime.Now,
+                            Quantity = model.Quantity,
+                            OfferID = Offer.ID
+                        };
+                        account.Cart.CartItems.Add(cartItem);
                         #endregion
                         break;
                     case OfferType.Free:
                         #region  Free Offer
-                        var cartItemMain = account.Cart.CartItems.FirstOrDefault(x => x.ItemID == Offer.ItemID && x.OfferID == Offer.ID);
-                        if (cartItemMain == null)
+                        var cartItemMain = new CartItem()
                         {
-                            cartItemMain = (new CartItem()
-                            {
-                                ItemID = Offer.ItemID,
-                                CreationDate = DateTime.Now
-                            });
-                            account.Cart.CartItems.Add(cartItemMain);
-                        }
-                        cartItemMain.Quantity = model.Quantity;
-                        cartItemMain.UnitNetPrice = cartItemMain.UnitPrice = Offer.Item.Price;
-                        cartItemMain.UnitDiscount = 0;
-                        cartItemMain.Total = cartItemMain.Quantity * cartItemMain.UnitNetPrice;
-                        cartItemMain.IsFree = false;
-                        cartItemMain.OfferID = Offer.ID;
+                            ItemID = Offer.ItemID,
+                            CreationDate = DateTime.Now,
+                            Quantity = model.Quantity,
+                            OfferID = Offer.ID
+                        };
+                        account.Cart.CartItems.Add(cartItemMain);
                         foreach (var offerItem in Offer.OfferItems)
                         {
-                            var itemFree = await _context.Set<Item>().FirstOrDefaultAsync(x => x.ID == offerItem.ID);
-                            var cartItemFree = account.Cart.CartItems.FirstOrDefault(x => x.ItemID == itemFree.ID && x.OfferID == Offer.ID);
-                            if (cartItemFree == null)
+                            var itemFree = await _context.Set<Item>().FirstOrDefaultAsync(x => x.ID == offerItem.ItemID);
+                            if (itemFree == null) continue;
+                            var cartItemFree = new CartItem()
                             {
-                                cartItemFree = (new CartItem()
-                                {
-                                    ItemID = itemFree.ID,
-                                    CreationDate = DateTime.Now
-                                });
-                                account.Cart.CartItems.Add(cartItemFree);
-                            }
-                            cartItemFree.Quantity = model.Quantity;
-                            cartItemFree.UnitPrice = itemFree.Price;
-                            cartItemFree.UnitDiscount = Offer.Discount;
-                            cartItemFree.UnitNetPrice = itemFree.Price - (itemFree.Price * Offer.Discount / 100.0);
-                            cartItemFree.Total = cartItemFree.Quantity * cartItemFree.UnitNetPrice;
-                            cartItemFree.IsFree = true;
-                            cartItemFree.OfferID = Offer.ID;
+                                ItemID = itemFree.ID,
+                                CreationDate = DateTime.Now,
+                                Quantity = model.Quantity,
+                                OfferID = Offer.ID
+                            };
+                            account.Cart.CartItems.Add(cartItemFree);
                         }
                         #endregion
                         break;
                     case OfferType.Set:
-
-                        break;
                     case OfferType.None:
                     default:
                         break;
@@ -218,7 +200,7 @@ namespace NavaraAPI.Controllers
                 #endregion
 
                 await _context.SaveChangesAsync();
-                account.Cart.UpdateCartItems();
+                await account.Cart.UpdateCart(_context);
                 return NoContent();
             }
             catch (Exception ex)

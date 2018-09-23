@@ -12,12 +12,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using NavaraAPI.IServices;
-using NavaraAPI.Models;
-using NavaraAPI.Services;
 using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Classes;
 using SmartLifeLtd.Data.DataContexts;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using SmartLifeLtd.Data.Tables.Navara;
+using SmartLifeLtd.Services;
+using SmartLifeLtd.IServices;
 
 namespace NavaraAPI
 {
@@ -50,16 +53,23 @@ namespace NavaraAPI
                  DBLogConf.GetValue<string>("Password")
              );
             services.AddDbContext<NavaraDbContext>(options => options.UseSqlServer(connectionString.ToString()));
+            //services.AddDbContext<BaseDbContext>(options => options.UseSqlServer(connectionString.ToString()));
             services.AddDbContext<LogDbContext>(options => options.UseSqlServer(logConnectionString.ToString()));
             NavaraDbContext.DEFAULT_CONNECTION_STRING = connectionString.ToString();
 
-            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IUsersService, UsersService<Account, NavaraDbContext>>();
             // AddIdentity adds cookie based authentication
             // Adds scoped classes for things like UserManager, SignInManager, PasswordHashers etc..
             services.AddIdentity<ApplicationUser, IdentityRole>(optoins =>
             {
                 //Onyl unique emails
                 optoins.User.RequireUniqueEmail = true;
+                optoins.Password.RequireDigit = false;
+                optoins.Password.RequiredLength = 6;
+                optoins.Password.RequiredUniqueChars = 0;
+                optoins.Password.RequireLowercase = false;
+                optoins.Password.RequireNonAlphanumeric = false;
+                optoins.Password.RequireUppercase = false;
             })
                            // Adds UserStore and RoleStore from this context
                            // That are consumed by the UserManager and RoleManager
@@ -69,9 +79,9 @@ namespace NavaraAPI
                            .AddDefaultTokenProviders();
 
             //Configure IoC values
-            JwtService.Audience = IoCCore.AppViewModel.Audience = Configuration["Jwt:Audience"];
-            JwtService.Issuer = IoCCore.AppViewModel.Issuer = Configuration["Jwt:Issuer"];
-            JwtService.SecretKey = IoCCore.AppViewModel.SecretKey = Configuration["Jwt:SecretKey"];
+            JwtService.Audience = Configuration["Jwt:Audience"];
+            JwtService.Issuer = Configuration["Jwt:Issuer"];
+            JwtService.SecretKey = Configuration["Jwt:SecretKey"];
 
 
             //Add the token based authentication
@@ -84,10 +94,10 @@ namespace NavaraAPI
                     ValidateIssuer = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = IoCCore.AppViewModel.Issuer,
-                    ValidAudience = IoCCore.AppViewModel.Audience,
+                    ValidIssuer = JwtService.Issuer,
+                    ValidAudience = JwtService.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(
-                      Encoding.UTF8.GetBytes(IoCCore.AppViewModel.SecretKey))
+                      Encoding.UTF8.GetBytes(JwtService.SecretKey))
                 };
             }).AddFacebook(options =>
             {
@@ -114,6 +124,11 @@ namespace NavaraAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, NavaraDbContext Context)
         {
+            app.UseDirectoryBrowser(new DirectoryBrowserOptions()
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot")),
+                RequestPath = new PathString()
+            });
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

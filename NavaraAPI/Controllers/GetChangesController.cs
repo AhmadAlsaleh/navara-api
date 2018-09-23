@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NavaraAPI.Models;
 using NavaraAPI.ViewModels;
 using SmartLifeLtd.API;
 using SmartLifeLtd.Classes.Attribute;
@@ -14,6 +13,7 @@ using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables;
 using SmartLifeLtd.Data.Tables.Navara;
 using SmartLifeLtd.Enums;
+using SmartLifeLtd.Models;
 
 namespace NavaraAPI.Controllers
 {

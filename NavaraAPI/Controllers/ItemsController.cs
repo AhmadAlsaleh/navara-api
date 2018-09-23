@@ -65,6 +65,7 @@ namespace NavaraAPI.Controllers
                     ItemCategory = x.ItemCategory?.Name,
                     Price = x.Price,
                     Quantity = x.Quantity,
+                    ItemCategoryID = x.ItemCategoryID,
                     ThumbnailImagePath = x.ThumbnailImagePath
                 }));
                 return json;
@@ -90,6 +91,7 @@ namespace NavaraAPI.Controllers
                     ItemCategory = x.ItemCategory?.Name,
                     Price = x.Price,
                     Quantity = x.Quantity,
+                    ItemCategoryID = x.ItemCategoryID,
                     ThumbnailImagePath = x.ThumbnailImagePath
                 }));
                 return json;

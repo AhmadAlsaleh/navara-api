@@ -1,4 +1,8 @@
 ﻿{
   "ApplicationName": "Navara Store",
-  "AboutUs":  "About us"
+  "Home": {
+    "": "",
+
+  },
+  "AboutUs": "About us"
 }

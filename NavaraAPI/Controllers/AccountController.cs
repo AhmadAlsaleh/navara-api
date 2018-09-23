@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NavaraAPI.Models;
-using NavaraAPI.Services;
 using NavaraAPI.ViewModels;
 using SmartLifeLtd;
 using SmartLifeLtd.Classes;
@@ -13,13 +11,14 @@ using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Navara;
 using SmartLifeLtd.Enums;
-using NavaraAPI.IServices;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using SmartLifeLtd.Management.Interfaces;
+using SmartLifeLtd.ViewModels;
 
 namespace NavaraAPI.Controllers
 {
@@ -113,10 +112,9 @@ namespace NavaraAPI.Controllers
                 if (account.Cart == null)
                     return BadRequest("This account is not related to any cart");
 
-                account.Cart.UpdateCartItems();
+                await account.Cart.UpdateCart(_Context);
                 var json = new JsonResult(new CartViewModel()
                 {
-                    ID = account.CartID,
                     CreatedDate = account.Cart.CreationDate,
                     Items = account.Cart.CartItems.Select(x => new CartItemViewModel
                     {
@@ -145,7 +143,7 @@ namespace NavaraAPI.Controllers
         /// <returns></returns>
         [AuthorizeToken]
         [HttpPost]
-        public async Task<IActionResult> UpdateInformation([FromBody]UpdateUserInformationViewModel userInfo)
+        public async Task<IActionResult> UpdateInformation([FromBody]UpdateUserInformationDataModel userInfo)
         {
             if (ModelState.IsValid)
             {

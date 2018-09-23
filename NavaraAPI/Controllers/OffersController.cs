@@ -63,7 +63,8 @@ namespace NavaraAPI.Controllers
                     Title = x.Title,
                     ThumbnailImagePath = x.ThumbnailImagePath,
                     ShortDescription = x.ShortDescription,
-                    OfferType = x.OfferType
+                    OfferType = x.OfferType,
+                    Discount = x.Discount
                 }));
                 return json;
             }

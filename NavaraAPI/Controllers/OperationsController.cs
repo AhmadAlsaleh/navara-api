@@ -1,25 +1,10 @@
 ﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NavaraAPI.Models;
-using NavaraAPI.Services;
-using NavaraAPI.ViewModels;
-using SmartLifeLtd;
-using SmartLifeLtd.Classes.Attribute;
-using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Data.DataContexts;
-using SmartLifeLtd.Data.Tables.Navara;
-using SmartLifeLtd.Enums;
-using SmartLifeLtd.IServices;
 using SmartLifeLtd.Sync;
 using SmartLifeLtd.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace NavaraAPI.Controllers
