@@ -46,8 +46,9 @@ namespace NavaraAPI.Controllers
                 var userID = HttpContext.User.Identity.Name;
                 if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
                 ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+                if (user == null) return BadRequest("Error in get user or account data");
                 Account account = _Context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
-                if (user == null || account == null) return null;
+                if (account == null) return BadRequest("Error in get user or account data");
                 return Json(new
                 {
                     account.Name,
@@ -74,8 +75,9 @@ namespace NavaraAPI.Controllers
                 var userID = HttpContext.User.Identity.Name;
                 if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
                 ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+                if (user == null) return BadRequest("Error in get user or account data");
                 Account account = _Context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
-                if (user == null || account == null) return null;
+                if (account == null) return BadRequest("Error in get user or account data");
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
 
                 var orders = _Context.Set<Order>().Include(x => x.OrderItems).Where(x => x.AccountID == account.ID);
@@ -84,7 +86,11 @@ namespace NavaraAPI.Controllers
                     ID = x.ID,
                     Name = x.Name,
                     Date = x.CreationDate,
-                    Code = "ORD009101FA1"
+                    Code = x.Code,
+                    TotalPrices = x.OrderItems.Sum(y => (y.UnitPrice ?? 0) * (y.Quantity ?? 1)),
+                    TotalDiscount = x.OrderItems.Sum(y => y.UnitDiscount ?? 0),
+                    NetTotalPrices = x.OrderItems.Sum(y => y.Total ?? 0),
+                    Status = x.Status
                 }));
                 return json;
             }
@@ -102,11 +108,16 @@ namespace NavaraAPI.Controllers
                 var userID = HttpContext.User.Identity.Name;
                 if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
                 ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
+                if (user == null) return BadRequest("Error in get user or account data");
                 Account account = _Context.Set<Account>()
                     .Include(x => x.Cart)
                         .ThenInclude(x => x.CartItems)
+                            .ThenInclude(x => x.Offer)
+                    .Include(x => x.Cart)
+                        .ThenInclude(x => x.CartItems)
+                            .ThenInclude(x => x.Item)
                     .FirstOrDefault(x => x.ID == user.AccountID);
-                if (user == null || account == null) return BadRequest("Error in get user or account data");
+                if (account == null) return BadRequest("Error in get user or account data");
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
 
                 if (account.Cart == null)
@@ -119,10 +130,14 @@ namespace NavaraAPI.Controllers
                     Items = account.Cart.CartItems.Select(x => new CartItemViewModel
                     {
                         ItemID = x.ItemID,
+                        ItemName = x.Item?.Name,
+                        ItemThumbnail = x.Item?.ThumbnailImagePath,
                         Quantity = x.Quantity,
                         UnitDiscount = x.UnitDiscount,
-                        IsFree = x.IsFree, 
+                        IsFree = x.IsFree,
                         OfferID = x.OfferID,
+                        OfferTitle = x.Offer?.Title,
+                        OfferThumbnail = x.Offer?.ThumbnailImagePath,
                         Total = x.Total,
                         UnitNetPrice = x.UnitNetPrice,
                         UnitPrice = x.UnitPrice
@@ -155,7 +170,15 @@ namespace NavaraAPI.Controllers
                     Account account = _Context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
                     if (user == null || account == null) return null;
                     account.Name = userInfo.FirstName;
-                    account.Mobile = userInfo.PhoneNumber;
+                    if (user.UserName.Trim() != user.PhoneNumber.Trim())
+                    {
+                        account.Mobile = userInfo.PhoneNumber;
+                        user.PhoneNumber = userInfo.PhoneNumber;
+                    }
+                    if (user.UserName.Trim() != user.Email.Trim())
+                        user.Email = userInfo.Email;
+
+                    await _Context.SubmitAsync();
                     return Ok();
                 }
                 catch (Exception ex)

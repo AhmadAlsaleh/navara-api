@@ -78,6 +78,9 @@ namespace NavaraAPI.Controllers
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
                 #endregion
 
+                var it = _context.Set<Item>().FirstOrDefault(x => x.ID == model.ItemID);
+                if (it == null) return BadRequest("No Item related to this ItemID");
+
                 #region Create cart for the first time
                 if (account.Cart == null)
                 {
@@ -87,6 +90,14 @@ namespace NavaraAPI.Controllers
                         TotalAmount = 0,
                         LastPurchase = DateTime.Now,
                     };
+                }
+                else
+                {
+                    foreach(var ci in account.Cart.CartItems)
+                    {
+                        if (ci.ItemID == null || ci.UnitPrice == null)
+                            _context.Set<CartItem>().Remove(ci);
+                    }
                 }
                 #endregion
                 
@@ -133,6 +144,9 @@ namespace NavaraAPI.Controllers
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
                 #endregion
 
+                var off = _context.Set<Offer>().FirstOrDefault(x => x.ID == model.OfferID);
+                if (off == null) return BadRequest("No Offer related to this OfferID");
+
                 #region Create cart for the first time
                 if (account.Cart == null)
                 {
@@ -142,6 +156,14 @@ namespace NavaraAPI.Controllers
                         TotalAmount = 0,
                         LastPurchase = DateTime.Now,
                     };
+                }
+                else
+                {
+                    foreach (var ci in account.Cart.CartItems)
+                    {
+                        if (ci.ItemID == null || ci.UnitPrice == null)
+                            _context.Set<CartItem>().Remove(ci);
+                    }
                 }
                 #endregion
 

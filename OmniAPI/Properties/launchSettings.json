@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:64922/",
+      "applicationUrl": "http://localhost:58614/",
       "sslPort": 0
     }
   },
@@ -16,14 +16,14 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "NavaraAPI": {
+    "OmniAPI": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:64923/"
+      "applicationUrl": "http://localhost:58615/"
     }
   }
 }

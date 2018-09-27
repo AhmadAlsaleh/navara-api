@@ -39,6 +39,7 @@ namespace NavaraAPI.Controllers
                 Order order = new Order()
                 {
                     AccountID = account.ID,
+                    CreationDate = DateTime.Now,
                     FromTime = DateTime.Parse(model.FromTime),
                     ToTime = DateTime.Parse(model.ToTime),
                     Location = model.Location,
@@ -53,13 +54,15 @@ namespace NavaraAPI.Controllers
                     OrderItem orderItem = new OrderItem()
                     {
                         ItemID = record.OrderItemID,
-                        Quantity = record.Quantity
+                        Quantity = record.Quantity,
+                        OfferID = record.OfferID
                     };
                     order.OrderItems.Add(orderItem);
                 }
                 order.GenerateCode(_context as NavaraDbContext);
                 this._context.Set<Order>().Add(order);
                 await this._context.SaveChangesAsync();
+                await order.UpdateOrder(_context);
                 return Json(new { OrderCode = order.Code });
             }
             catch (Exception ex)
@@ -80,7 +83,10 @@ namespace NavaraAPI.Controllers
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
                 ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
 
-                var order = await _context.Set<Order>().Include(x => x.OrderItems).SingleOrDefaultAsync(x => x.ID == id);
+                var order = await _context.Set<Order>()
+                    .Include(x => x.OrderItems)
+                        .ThenInclude(x => x.Item)
+                    .SingleOrDefaultAsync(x => x.ID == id);
                 if (order == null) return NotFound("id is not realted to any order");
                 if (order.AccountID != user.AccountID) return BadRequest("This Order is not related to the authorized user");
                 var json = new JsonResult(new OrderModel()
@@ -96,7 +102,11 @@ namespace NavaraAPI.Controllers
                     OrderItems = order.OrderItems.Select(y => new OrderItemModel
                     {
                         OrderItemID = y.ID,
-                        Quantity = y.Quantity
+                        Quantity = y.Quantity,
+                        Name = y.Item?.Name,
+                        UnitNetPrice = y.UnitNetPrice,
+                        ThumbnailImagePath = y.Item?.ThumbnailImagePath,
+                        Total = y.Total
                     }).ToList()
                 });
                 return json;
@@ -106,6 +116,5 @@ namespace NavaraAPI.Controllers
                 return BadRequest();
             }
         }
-
     }
 }

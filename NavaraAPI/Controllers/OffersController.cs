@@ -56,7 +56,7 @@ namespace NavaraAPI.Controllers
         {
             try
             {
-                var data = _context.Set<Offer>().ToList();
+                var data = _context.Set<Offer>().Include(x => x.Item).ToList();
                 var json = new JsonResult(data.Select(x => new OfferBasicModel()
                 {
                     ID = x.ID,
@@ -64,7 +64,8 @@ namespace NavaraAPI.Controllers
                     ThumbnailImagePath = x.ThumbnailImagePath,
                     ShortDescription = x.ShortDescription,
                     OfferType = x.OfferType,
-                    Discount = x.Discount
+                    Discount = x.Discount,
+                    UnitNetPrice = x.Item.Price * x.Discount / 100.0
                 }));
                 return json;
             }

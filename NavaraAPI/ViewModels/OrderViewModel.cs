@@ -23,12 +23,21 @@ namespace NavaraAPI.ViewModels
         public Guid ID { set; get; }
         public string Name { get; set; }
         public DateTime? Date { get; set; }
-        public string Code { set; get; } = "ORD0091A42";
+        public string Code { set; get; }
+        public double? TotalPrices { set; get; }
+        public double? TotalDiscount { set; get; }
+        public double? NetTotalPrices { set; get; }
+        public string Status { set; get; }
     }
 
     public class OrderItemModel
     {
         public Guid? OrderItemID { get; set; }
+        public Guid? OfferID { get; set; }
+        public string ThumbnailImagePath { get; set; }
+        public string Name { get; set; }
+        public double? UnitNetPrice { get; set; }
+        public double? Total { get; set; }
         public int? Quantity { set; get; }
     }
 }

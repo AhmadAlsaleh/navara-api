@@ -41,5 +41,6 @@ namespace NavaraAPI.ViewModels
         public string OfferType { get; set; }
         public string ThumbnailImagePath { get; set; }
         public double? Discount { get; set; }
+        public double? UnitNetPrice { get; set; }
     }
 }

@@ -14,6 +14,8 @@ namespace NavaraAPI.ViewModels
     public class CartItemViewModel
     {
         public Guid? ItemID { set; get; }
+        public string ItemName { set; get; }
+        public string ItemThumbnail { set; get; }
         public int? Quantity { set; get; }
         public double? UnitPrice { set; get; }
         public double? UnitDiscount { set; get; }
@@ -21,6 +23,8 @@ namespace NavaraAPI.ViewModels
         public double? Total { set; get; }
         public bool? IsFree { set; get; }
         public Guid? OfferID { set; get; }
+        public string OfferTitle { set; get; }
+        public string OfferThumbnail { set; get; }
     }
 
     public class CartOfferViewModel
