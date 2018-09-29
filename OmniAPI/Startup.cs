@@ -14,11 +14,11 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Classes;
-using SmartLifeLtd.Data.Tables.Omni;using SmartLifeLtd.Data.AspUsers;using SmartLifeLtd.Data.DataContexts;
+using SmartLifeLtd.Data.Tables.Omni;
+using SmartLifeLtd.Data.DataContexts;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
 using Microsoft.AspNetCore.Http;
-using SmartLifeLtd.Data.Tables.Omni;
 using SmartLifeLtd.Services;
 using SmartLifeLtd.IServices;
 
@@ -136,8 +136,7 @@ namespace OmniAPI
             }
             app.UseStaticFiles();
             app.UseMvc();
-            Context.Database.Migrate();
-
+            //Context.Database.Migrate();
         }
     }
 }

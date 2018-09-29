@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 namespace OmniAPI.Models
 {
-    public class AdPagesViewModel
+    public class SearchDataModel
     {
         public int Page { get; set; } = 0;
         public int Count { set; get; } = 10;

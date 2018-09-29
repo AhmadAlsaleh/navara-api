@@ -26,7 +26,12 @@ namespace NavaraAPI.Controllers
         {
             try
             {
-                var offer = await _context.Set<Offer>().FirstOrDefaultAsync(x => x.ID == id);
+                var offer = await _context.Set<Offer>()
+                    .Include(x => x.OfferItems)
+                        .ThenInclude(x => x.Item)
+                            .ThenInclude(x => x.ItemCategory)
+                    .Include(x => x.OfferImages)
+                    .FirstOrDefaultAsync(x => x.ID == id);
                 if (offer == null) return NotFound("id is not related to any Offer");
                 var json = new JsonResult(new OfferFullModel()
                 {
@@ -34,6 +39,8 @@ namespace NavaraAPI.Controllers
                     Title = offer.Title,
                     Price = offer.Price,
                     Discount = offer.Discount,
+                    UnitNetPrice = ( offer.Item?.Price ?? 0) - ((offer.Item?.Price ?? 0) * (offer.Discount ?? 0) / 100.0),
+                    UnitPrice = offer.Item?.Price ?? 0,
                     Description = offer.Description,
                     ThumbnailImagePath = offer.ThumbnailImagePath,
                     IsActive = offer.IsActive,
@@ -41,7 +48,17 @@ namespace NavaraAPI.Controllers
                     OfferType = offer.OfferType,
                     ItemID = offer.ItemID,
                     OfferImages = offer.OfferImages?.Select(y => y.ImagePath).ToList(),
-                    OfferItems = offer.OfferItems?.Select(y => y.ItemID.GetValueOrDefault()).ToList()
+                    OfferItems = offer.OfferItems?.Select(y => new ItemBasicModel()
+                    {
+                        ID = y.ItemID ?? Guid.Empty,
+                        Name = y.Item?.Name,
+                        Price = y.Item?.Price,
+                        Quantity = y.Item?.Quantity,
+                        ShortDescription = y.Item?.ShortDescription,
+                        ItemCategoryID = y.Item?.ItemCategoryID,
+                        ThumbnailImagePath = y.Item?.ThumbnailImagePath,
+                        ItemCategory = y.Item?.ItemCategory?.Name
+                    }).ToList()
                 });
                 return json;
             }
@@ -65,7 +82,8 @@ namespace NavaraAPI.Controllers
                     ShortDescription = x.ShortDescription,
                     OfferType = x.OfferType,
                     Discount = x.Discount,
-                    UnitNetPrice = x.Item.Price * x.Discount / 100.0
+                    UnitNetPrice = (x.Item?.Price ?? 0) - ((x.Item?.Price  ?? 0) * (x.Discount ?? 0) / 100.0),
+                    UnitPrice = x.Item?.Price
                 }));
                 return json;
             }

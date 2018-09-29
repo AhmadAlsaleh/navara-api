@@ -27,11 +27,13 @@ namespace NavaraAPI.ViewModels
         public string ShortDescription { get; set; }
         public string OfferType { get; set; }
         public double? Discount { get; set; }
+        public double? UnitNetPrice { get; set; }
+        public double? UnitPrice { get; set; }
         public bool? IsActive { set; get; }
         public string ThumbnailImagePath { set; get; }
         public Guid? ItemID { get; set; }
         public List<string> OfferImages { set; get; }
-        public List<Guid> OfferItems { set; get; }
+        public List<ItemBasicModel> OfferItems { set; get; }
     }
     public class OfferBasicModel
     {
@@ -42,5 +44,6 @@ namespace NavaraAPI.ViewModels
         public string ThumbnailImagePath { get; set; }
         public double? Discount { get; set; }
         public double? UnitNetPrice { get; set; }
+        public double? UnitPrice { get; set; }
     }
 }
