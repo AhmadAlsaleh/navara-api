@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NavaraAPI", "NavaraAPI\NavaraAPI.csproj", "{4207F5A8-29E0-4087-9C92-6561A8FEA4C8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OmniAPI", "OmniAPI\OmniAPI.csproj", "{AAD23A09-1DD3-4509-AB56-D5CC627226D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniAPI", "OmniAPI\OmniAPI.csproj", "{AAD23A09-1DD3-4509-AB56-D5CC627226D9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartlifeLtd", "..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj", "{2748F096-F490-4AD8-8417-7F9580B9DE0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartlifeLtd", "..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj", "{5CF70496-A8C4-447D-A2C1-A6D89AA25017}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{AAD23A09-1DD3-4509-AB56-D5CC627226D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AAD23A09-1DD3-4509-AB56-D5CC627226D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AAD23A09-1DD3-4509-AB56-D5CC627226D9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2748F096-F490-4AD8-8417-7F9580B9DE0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2748F096-F490-4AD8-8417-7F9580B9DE0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2748F096-F490-4AD8-8417-7F9580B9DE0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2748F096-F490-4AD8-8417-7F9580B9DE0A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5CF70496-A8C4-447D-A2C1-A6D89AA25017}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5CF70496-A8C4-447D-A2C1-A6D89AA25017}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5CF70496-A8C4-447D-A2C1-A6D89AA25017}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5CF70496-A8C4-447D-A2C1-A6D89AA25017}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

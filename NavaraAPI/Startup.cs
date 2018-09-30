@@ -119,6 +119,19 @@ namespace NavaraAPI
             });
 
             services.AddMvc();
+
+            #region Configure Email
+            EmailService.AppName = "Navara Store";
+            EmailService.SenderName = "Navara Store Team";
+            EmailService.ConfirmationURL = "http://api.navarastore.com/Users/ConfirmAccount?token={0}&userid={1}";
+            EmailService.ResetURL = "http://api.navarastore.com/Users/ResetPassword?token={0}&UserID={1}";
+            EmailService.ConfirmURL = "http://api.navarastore.com/User/ConfirmEmail/";
+            EmailService.SenderEmail = "noreply@navarastore.com";
+            EmailService.Password = "P@ssw0rd";
+            EmailService.ServerMailHost = "mi3-wts6.a2hosting.com";
+            EmailService.ServerPort = 25;
+            EmailService.SSLNeed = false;
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
