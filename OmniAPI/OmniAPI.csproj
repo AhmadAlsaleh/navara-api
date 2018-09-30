@@ -5,6 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="wwwroot\Images\ItemImages\**" />
+    <Content Remove="wwwroot\Images\ItemImages\**" />
+    <EmbeddedResource Remove="wwwroot\Images\ItemImages\**" />
+    <None Remove="wwwroot\Images\ItemImages\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
   </ItemGroup>
 

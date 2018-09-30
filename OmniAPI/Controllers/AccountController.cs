@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MimeKit;
+using OmniAPI.Classes;
 using OmniAPI.Controllers;
 using OmniAPI.Models;
 using SmartLifeLtd.API;
@@ -45,8 +46,8 @@ namespace Omni.Controllers.API
             _userManager = userManager;
         }
 
-        [AuthorizeToken]
         [HttpGet]
+        [AuthorizeToken]
         public async Task<IActionResult> GetSearches()
         {
             #region Check user
@@ -59,20 +60,24 @@ namespace Omni.Controllers.API
             if (user == null || account == null) return null;
             #endregion
 
-            return Ok(account.Searches.Select(x => new
+            if (account.Searches == null)
+                return BadRequest("Error in get saved searches");
+
+            var searches = account.Searches.Select(x => new SavedSearchDataModel
             {
-                x.Name,
-                x.SearchDate,
-                x.FromPrice,
-                x.ToPrice,
-                x.SearchInDescription,
-                x.CategoryID,
-                x.Keywords
-            }));
+                Name = x.Name,
+                SearchDate = x.SearchDate,
+                FromPrice = x.FromPrice,
+                ToPrice = x.ToPrice,
+                SearchInDescription = x.SearchInDescription,
+                CategoryID = x.CategoryID,
+                Keywords = x.Keywords
+            });
+            return Ok(searches);
         }
 
-        [AuthorizeToken]
         [HttpGet]
+        [AuthorizeToken]
         public async Task<IActionResult> GetOwnItems()
         {
             #region Check user
@@ -82,70 +87,44 @@ namespace Omni.Controllers.API
             Account account = _context.Set<Account>()
                 .Include(x => x.ADs)
                     .ThenInclude(x => x.ADImages)
+                .Include(x => x.ADs)
+                    .ThenInclude(x => x.Currency)
+                .Include(x => x.ADs)
+                    .ThenInclude(x => x.Category)
+                .Include(x => x.ADs)
+                    .ThenInclude(x => x.FavouriteADs)
                 .FirstOrDefault(x => x.ID == user.AccountID);
             if (user == null || account == null) return null;
             #endregion
 
-            string DefCurrency = _context.Set<Currency>().FirstOrDefault(x => x.IsDefault == true)?.Symbol ?? "";
+            if (account.ADs == null) return BadRequest("Error in get Ads account");
+
             List<ADDataModel> Data = new List<ADDataModel>();
             foreach (var ad in account.ADs)
             {
-                if (ad.IsDisabled == false) continue;
-                var item = new ADDataModel()
+                if (ad == null || ad.IsDisabled.GetValueOrDefault() == true) continue;
+                try
                 {
-                    ID = ad.ID,
-                    Name = ad.Name,
-                    Title = ad.Title,
-                    Currency = ad?.Currency?.Symbol ?? DefCurrency,
-                    Price = ad.Price,
-                    Code = ad.Code,
-                    Views = ad.ADViews,
-                    CategoryID = ad.CategoryID,
-                    Likes = _context.Set<SavedAD>().Count(x => x.ADID == ad.ID),
-                    Category = ad.Category?.Name,
-                    PublishedDate = ad.PublishedDate
-                };
-                ADImage adImage = ad.ADImages.FirstOrDefault(x => x.IsMain == true);
-                string filePath = $"{this.HttpContext.Request.Host.Value}/images/No-image-found.jpg";
-                if (adImage != null)
-                {
-                    filePath = $"{this.HttpContext.Request.Host.Value}/{adImage.ImagePath.Replace("\\", "/")}";
-                    string physicalFilePath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\{adImage.ImagePath}";
-                    if (!System.IO.File.Exists(physicalFilePath))
-                        filePath = $"{this.HttpContext.Request.Host.Value}/images/No-image-found.jpg";
+                    var item = new ADDataModel()
+                    {
+                        ID = ad.ID,
+                        Name = ad.Name,
+                        Title = ad.Title,
+                        Currency = ad.Currency?.Symbol ?? "SP",
+                        Price = ad.Price,
+                        Code = ad.Code,
+                        Views = ad.ADViews,
+                        CategoryID = ad.CategoryID,
+                        Likes = ad.FavouriteADs.Count(),
+                        Category = ad.Category?.Name,
+                        PublishedDate = ad.PublishedDate,
+                        MainImage = ad.GetMainImageRelativePath()
+                    };
+                    Data.Add(item);
                 }
-                item.MainImage = filePath;
-                Data.Add(item);
+                catch { }
             }
             return Json(Data);
-        }
-
-        [AuthorizeToken]
-        [HttpGet]
-        public async Task<IActionResult> GetChatNotSeen()
-        {
-            try
-            {
-                #region Check user
-                var userID = HttpContext.User.Identity.Name;
-                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-                ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
-                Account account = _context.Set<Account>()
-                    .Include(x => x.Chats)
-                        .ThenInclude(x => x.AD)
-                    .Include(x => x.Chats)
-                        .ThenInclude(x => x.Messages)
-                    .FirstOrDefault(x => x.ID == user.AccountID);
-                if (user == null || account == null) return null;
-                #endregion
-
-                var allChats = account.Chats.Where(x => x.Messages.Any(y => y.SeenDate == null));
-                return Ok(allChats);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e.Message);
-            }
         }
 
         [HttpGet]
@@ -166,16 +145,18 @@ namespace Omni.Controllers.API
             if (user == null || account == null) return null;
             #endregion
 
-            var chats = account.Chats.Where(x => x.AD != null).Select(chat => new ChatDataModel()
+            if (account.Chats == null) return BadRequest("Error in get chats account");
+
+            var chats = account.Chats.Where(x => x?.AD != null).Select(chat => new ChatDataModel()
             {
                 ChatID = chat.ID,
                 AdID = chat.ADID,
                 Owner = chat.OwnerName,
                 OwnerAccountID = chat.OwnerAccountID,
                 AdTitle = chat.AD.Title,
-                Image = chat.AD.ADImages.SingleOrDefault(S => S.IsMain == true)?.ImagePath ?? "",
+                Image = chat.AD.GetMainImageRelativePath(),
                 Messages = new List<ChatMessageDataModel>() {
-                    chat.Messages.OrderByDescending(x => x.SentDate).Select(msg => new ChatMessageDataModel()
+                    chat.Messages?.OrderByDescending(x => x.SentDate).Select(msg => new ChatMessageDataModel()
                     {
                         Body = msg.Body,
                         SeenDate = msg.SeenDate,
@@ -193,33 +174,33 @@ namespace Omni.Controllers.API
         [AuthorizeToken]
         public async Task<IActionResult> GetAccountInfo()
         {
-            try
-            {
-                #region Check user
-                var userID = HttpContext.User.Identity.Name;
-                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-                ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
-                Account account = _context.Set<Account>()
-                    .Include(x => x.ADs)
-                        .ThenInclude(x => x.ADImages)
-                    .FirstOrDefault(x => x.ID == user.AccountID);
-                if (user == null || account == null) return null;
-                #endregion
+            #region Check user
+            var userID = HttpContext.User.Identity.Name;
+            if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+            ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+            Account account = _context.Set<Account>()
+                .Include(x => x.ADs)
+                    .ThenInclude(x => x.ADImages)
+                .FirstOrDefault(x => x.ID == user.AccountID);
+            if (user == null || account == null) return null;
+            #endregion
 
-                var image = account.ImagePath;
-                if (string.IsNullOrEmpty(account.ImagePath))
-                    image = $"/images/defaultPerson.gif";
-                return Ok(new
-                {
-                    image = account.ImagePath,
-                    Phone = account.Phone,
-                    Name = account.Name
-                });
-            }
-            catch (Exception ex)
+            var image = account.ImagePath;
+            if (string.IsNullOrEmpty(account.ImagePath) || !System.IO.File.Exists(account.ImagePath?.GetFilePathOnServer()))
+                image = $"images/defaultPerson.gif";
+            var accountInfo = new
             {
-                return BadRequest();
-            }
+                image,
+                account.Name,
+                account.Latitude,
+                account.Longitude,
+                user.PhoneNumber,
+                user.Email,
+                user.UserName,
+                IsVerified = user.PhoneNumberConfirmed || user.EmailConfirmed,
+                account.LanguageID
+            };
+            return Ok(accountInfo);
         }
 
         #region Favorite
@@ -237,6 +218,7 @@ namespace Omni.Controllers.API
             if (user == null || account == null) return null;
             #endregion
 
+            if (account.FavouriteADs == null) return BadRequest("Error in get favorite ads");
             return Ok(account.FavouriteADs.Any(x => x.ADID == ID));
         }
 
@@ -254,14 +236,23 @@ namespace Omni.Controllers.API
                         .ThenInclude(x => x.Category)
                 .Include(x => x.FavouriteADs)
                     .ThenInclude(x => x.AD)
+                        .ThenInclude(x => x.Currency)
+                .Include(x => x.FavouriteADs)
+                    .ThenInclude(x => x.AD)
                         .ThenInclude(x => x.ADImages)
+                .Include(x => x.FavouriteADs)
+                    .ThenInclude(x => x.AD)
+                        .ThenInclude(x => x.FavouriteADs)
                 .FirstOrDefault(x => x.ID == user.AccountID);
             if (user == null || account == null) return null;
             #endregion
 
+            if (account.FavouriteADs == null) return BadRequest("Error in get favorite ads");
+
             List<ADDataModel> Data = new List<ADDataModel>();
             foreach (var favAd in account.FavouriteADs)
             {
+                if (favAd.AD == null || favAd.AD.IsDisabled.GetValueOrDefault() == false) continue;
                 var item = new ADDataModel()
                 {
                     ID = favAd.AD.ID,
@@ -271,17 +262,13 @@ namespace Omni.Controllers.API
                     Price = favAd.AD.Price,
                     Code = favAd.AD.Code,
                     Views = favAd.AD.ADViews,
-                    Likes = _context.Set<SavedAD>().Count(x => x.ADID == favAd.ADID),
-                    Category = favAd.AD.Category.Name,
+                    Likes = favAd.AD.FavouriteADs.Count(),
+                    Category = favAd.AD.Category?.Name,
                     CategoryID = favAd.AD.CategoryID,
-                    PublishedDate = favAd.AD.PublishedDate
+                    PublishedDate = favAd.AD.PublishedDate,
+                    MainImage = favAd.AD.GetMainImageRelativePath()
                 };
 
-                ADImage adImage = favAd.AD.ADImages.FirstOrDefault(x => x.IsMain == true);
-                string filePath = $"{this.HttpContext.Request.Host.Value}/images/No-image-found.jpg";
-                if (adImage != null)
-                    filePath = adImage.ImagePath;
-                item.MainImage = filePath;
                 Data.Add(item);
             }
             return Json(Data);
@@ -314,16 +301,12 @@ namespace Omni.Controllers.API
                         AddedDate = DateTime.Now,
                         CreationDate = DateTime.Now
                     });
-                    var AD = _context?.Set<AD>().SingleOrDefault(s => s.ID == ID);
-                    AD.NumberViews++;
                     await _context.SubmitAsync();
                     return Ok("AD Added from favorite");
                 }
                 else
                 {
                     _context.Set<SavedAD>().Remove(favAd);
-                    var AD = _context?.Set<AD>()?.SingleOrDefault(s => s.ID == ID);
-                    AD.NumberViews--;
                     await _context.SubmitAsync();
                     return Ok("AD Removed from favorite");
                 }
@@ -339,37 +322,40 @@ namespace Omni.Controllers.API
         [AuthorizeToken]
         public async Task<IActionResult> SaveSearch([FromBody] SearchDataModel model)
         {
+            #region Check user
+            var userID = HttpContext.User.Identity.Name;
+            if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+            ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+            Account account = _context.Set<Account>()
+                .Include(x => x.Searches)
+                .FirstOrDefault(x => x.ID == user.AccountID);
+            if (user == null || account == null) return null;
+            #endregion
+
+            if (model == null || ModelState.IsValid == false) return BadRequest("Unvalid recieved data");
+
             try
             {
-                #region Check user
-                var userID = HttpContext.User.Identity.Name;
-                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-                ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
-                Account account = _context.Set<Account>()
-                    .Include(x => x.Searches)
-                    .FirstOrDefault(x => x.ID == user.AccountID);
-                if (user == null || account == null) return null;
-                #endregion
-
                 Search NewSearch = new Search
                 {
                     AccountID = account.ID,
                     Keywords = model.SearchWord,
-                    CreationDate = DateTime.UtcNow,
-                    UpdatedDate = DateTime.UtcNow,
+                    CreationDate = DateTime.Now,
                     CategoryID = model.CategoryID,
-                    FromPrice = (int?)model.LowPrice,
-                    ToPrice = (int?)model.HighPrice,
+                    FromPrice = model.LowPrice,
+                    ToPrice = model.HighPrice,
                     SearchDate = DateTime.Now,
-                    Name = account.Name + DateTime.Now
+                    SearchInDescription = true,
+                    OnlyWithPhoto = false,
+                    Name = "Search " + DateTime.Now.ToString("ddMMyyyyHHmmss")
                 };
                 _context.Set<Search>().Add(NewSearch);
                 await _context.SubmitAsync();
-                return Ok();
+                return Ok("Saved search criteria successfully");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
     }

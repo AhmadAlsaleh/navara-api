@@ -13,7 +13,6 @@ namespace OmniAPI.Models
         public CategoryDataModel Parent { set; get; }
         public CategoryDataModel GrandParent { set; get; }
         public List<CategoryDataModel> SubCategories { set; get; }
-        public List<string> Options { set; get; }
         public Guid? ParentID { set; get; }
         public string Color { set; get; }
         public bool? HasChildren { set; get; }
@@ -26,8 +25,7 @@ namespace OmniAPI.Models
         public string Name { set; get; }
         public string ImagePath { set; get; }
         public int? AdsNumber { get; set; }
-        public CategoryDataModel Parent { set; get; } 
-        public CategoryDataModel GrandParent { set; get; }
-        public List<CategoryDataModel> SubCategories { set; get; }
+        public Guid? ParentID { set; get; }
+        public string Color { set; get; }
     }
 }

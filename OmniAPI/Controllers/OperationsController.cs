@@ -10,6 +10,7 @@ using SmartLifeLtd.Classes.Attribute;
 using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Omni;
+using SmartLifeLtd.Services;
 using SmartLifeLtd.Sync;
 using SmartLifeLtd.ViewModels;
 using System;
@@ -65,10 +66,11 @@ namespace OmniAPI.Controllers
             if (user == null || account == null) return null;
             #endregion
 
-            if (model == null) return BadRequest("No data provided");
+            if (model == null || ModelState.IsValid == false) return BadRequest("Unvalid data recieved");
             var AD = _Context.ADs.SingleOrDefault(S => S.ID == model.AddID);
             if (AD == null) return BadRequest("Ad ID is not related to any ad");
 
+            //EmailService.SendEmail(model.AddID.ToString(), "Report", model.Body, "Report us");
             Report NewReport = new Report
             {
                 ADID = AD.ID,

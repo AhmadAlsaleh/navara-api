@@ -10,6 +10,7 @@ using System;
 using System.IO;
 using OmniAPI.Models;
 using SmartLifeLtd.API;
+using OmniAPI.Classes;
 
 namespace OmniAPI.Controllers
 {
@@ -36,31 +37,26 @@ namespace OmniAPI.Controllers
                     .Include(x => x.CategoryLanguages)
                         .ThenInclude(x => x.Language)
                     .ToList();
-                var cat = categories?.Select(x => new CategoryFullDataModel
+
+                var adCategories = _context.Set<AD>()
+                    .Include(x => x.Category)
+                        .ThenInclude(x => x.Parent)
+                            .ThenInclude(x => x.Parent)
+                    .Select(x => new
+                    {
+                        Category = x.Category,
+                        Parent = x.Category == null ? null : x.Category.Parent,
+                        GrandParent = x.Category == null ? null : x.Category.Parent == null ? null : x.Category.Parent.Parent
+                    }).ToList();
+
+                var cat = categories.Select(x => new CategoryDataModel
                 {
                     ID = x.ID,
                     ImagePath = x.ImagePath,
                     Name = x.Name,
                     ParentID = x.ParentID,
                     Color = x.ColorCode,
-                    HasChildren = x.HasChildren,
-                    AdsNumber = _context.Set<AD>()
-                                     .Where(s => (s.IsDisabled ?? false) == false)
-                                     .Where(a => (a.CategoryID == x.ID) ||
-                                         (a.Category != null && a.Category.ParentID == x.ID) ||
-                                         (a.Category != null && a.Category.Parent != null && a.Category.Parent.ParentID == x.ID)).Count(),
-                    categoryFields = x.CategoryFields.Select(a => new CategoryFieldDataModel
-                    {
-                        CategoryFieldID = a.ID,
-                        CategoryFieldType = a.Type,
-                        CategoryFieldName = a.Name,
-                        CategoryFieldOption = a.CategoryFieldOptions.Select(opt => new CategoryFieldOptionDataModel()
-                        {
-                            CategoryFieldID = a.ID,
-                            CategoryFieldOptionID = opt.ID,
-                            Value = opt.Name
-                        }).ToList()
-                    }).ToList()
+                    AdsNumber = adCategories.Count(y => y.Category?.ID == x.ID || y.Parent?.ID == x.ID || y.GrandParent?.ID == x.ID)
                 });
                 return Ok(cat);
             }
@@ -76,20 +72,65 @@ namespace OmniAPI.Controllers
             try
             {
                 var item = await _context.Set<Category>().Include(x => x.ADs)
+                    .Include(x => x.CategoryFields)
+                        .ThenInclude(x => x.CategoryFieldOptions)
                     .Include(x => x.SubCategories)
                     .Include(x => x.Parent)
                         .ThenInclude(x => x.Parent)
                     .SingleOrDefaultAsync(x => x.ID == id);
-                if (item == null) return BadRequest();
-                var json = new JsonResult(new CategoryDataModel()
+                if (item == null) return BadRequest("No Category related to this ID");
+
+                var AdsNumber = _context.Set<AD>()
+                 .Where(s => (s.IsDisabled ?? false) == false)
+                 .Where(a => (a.CategoryID == item.ID) ||
+                     (a.Category != null && a.Category.ParentID == item.ID) ||
+                     (a.Category != null && a.Category.Parent != null && a.Category.Parent.ParentID == item.ID)).Count();
+
+                var json = new JsonResult(new CategoryFullDataModel()
                 {
                     ID = item.ID,
                     Name = item.Name,
-                    AdsNumber = item?.ADs?.Count,
+                    AdsNumber = AdsNumber,
                     ImagePath = item.ImagePath,
-                    SubCategories = item.SubCategories != null ? item.SubCategories.Select(y => new CategoryDataModel() { Name = y.Name, ImagePath = y.ImagePath, ID = y.ID }).ToList() : null,
-                    Parent = item.Parent != null ? new CategoryDataModel() { Name = item.Parent.Name, ImagePath = item.Parent.ImagePath, ID = item.Parent.ID } : null,
-                    GrandParent = item?.Parent?.Parent != null ? new CategoryDataModel() { Name = item.Parent.Parent.Name, ImagePath = item.Parent.Parent.ImagePath, ID = item.Parent.Parent.ID } : null
+                    Color = item.ColorCode,
+                    HasChildren = item.HasChildren,
+                    ParentID = item.ParentID,
+                    SubCategories = item.SubCategories.Select(y => new CategoryDataModel()
+                    {
+                        ID = y.ID,
+                        ParentID = y.ParentID,
+                        Name = y.Name,
+                        ImagePath = y.ImagePath,
+                        Color = y.ColorCode
+                    }).ToList(),
+                    Parent = item.Parent == null ? null : new CategoryDataModel()
+                    {
+                        ID = item.Parent.ID,
+                        ParentID = item.ParentID,
+                        Name = item.Parent.Name,
+                        ImagePath = item.Parent.ImagePath,
+                        Color = item.ColorCode
+                    },
+                    GrandParent = item?.Parent?.Parent == null ? null : new CategoryDataModel()
+                    {
+                        ID = item.Parent.Parent.ID,
+                        ParentID = item.ParentID,
+                        Name = item.Parent.Parent.Name,
+                        ImagePath = item.Parent.Parent.ImagePath,
+                        Color = item.ColorCode,
+                    },
+                    categoryFields = item.CategoryFields.Select(a => new CategoryFieldDataModel
+                    {
+                        CategoryFieldID = a.ID,
+                        CategoryFieldType = a.Type,
+                        CategoryFieldName = a.Name,
+                        CategoryFieldOption = a.CategoryFieldOptions.Select(opt => new CategoryFieldOptionDataModel()
+                        {
+                            CategoryFieldID = a.ID,
+                            CategoryFieldOptionID = opt.ID,
+                            Value = opt.Name
+                        }).ToList()
+                    }).ToList(),
                 });
                 return json;
             }
@@ -107,26 +148,30 @@ namespace OmniAPI.Controllers
                 var items = _context.Set<AD>()
                     .Include(x => x.ADImages)
                     .Include(x => x.Account)
+                    .Include(x => x.FavouriteADs)
+                    .Include(x => x.Currency)
                     .Include(x => x.Category)
                         .ThenInclude(x => x.Parent)
                             .ThenInclude(x => x.Parent)
-                   .Include(x => x.Currency)
                    .Where(x =>
                         (x.CategoryID == ID) ||
                         (x.Category != null && x.Category.ParentID == ID) ||
                         (x.Category != null && x.Category.Parent != null && x.Category.Parent.ParentID == ID)).ToList();
+
                 var data = items.Select(x => new ADDataModel
                 {
                     ID = x.ID,
                     CategoryID = x.Category?.ID,
                     Name = x.Name,
-                    Likes = x.NumberViews,
+                    Likes = x.FavouriteADs.Count,
                     PublishedDate = x.PublishedDate,
                     Views = x.ADViews,
                     Price = x.Price,
                     Title = x.Title,
                     Code = x.Code,
-                    MainImage = x.ADImages.SingleOrDefault(y => y.IsMain == true)?.ImagePath ?? "/images/No-image-found.jpg"
+                    MainImage = x.GetMainImageRelativePath(),
+                    Category = x.Category?.Name,
+                    Currency = x.Currency?.Name
                 });
                 return Ok(data);
             }

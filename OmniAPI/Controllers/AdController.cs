@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using OmniAPI.Classes;
 using OmniAPI.Controllers;
 using OmniAPI.Models;
 using SmartLifeLtd.API;
@@ -15,6 +16,7 @@ using SmartLifeLtd.Data.Tables.Omni;
 using SmartLifeLtd.Data.Tables.OMNI;
 using SmartLifeLtd.Data.Tables.Shared;
 using SmartLifeLtd.Enums;
+using SmartLifeLtd.Models;
 using SmartLifeLtd.Sync;
 using SmartLifeLtd.Utilities;
 using System;
@@ -36,12 +38,15 @@ namespace Omni.Controllers.API
         [HttpGet]
         public override async Task<IActionResult> Get()
         {
-            string DefCurrency = _context.Set<Currency>().FirstOrDefault(x => x.IsDefault == true)?.Symbol ?? "S.P";
             var Items = await _context.Set<AD>()
                         .Include(x => x.ADImages)
                         .Include(x => x.Account)
                         .Include(x => x.Category)
-                        .Include(x => x.Currency).Skip(0).Take(10).ToListAsync();
+                        .Include(x => x.Currency)
+                        .Where(x => x.IsDisabled.GetValueOrDefault() != true)
+                        .OrderByDescending(x => x.PublishedDate)
+                        .ToListAsync();
+
             var returnedData = Items.Select(x => new ADDataModel
             {
                 ID = x.ID,
@@ -49,13 +54,64 @@ namespace Omni.Controllers.API
                 CategoryID = x.Category?.ID,
                 Code = x.Code,
                 PublishedDate = x.PublishedDate,
-                Likes = x.NumberViews,
+                Likes = x.FavouriteADs.Count,
                 Views = x.ADViews,
                 Price = x.Price,
                 Title = x.Title,
-                MainImage = x.ADImages.FirstOrDefault(y => y.IsMain == true)?.ImagePath
+                MainImage = x.GetMainImageRelativePath(),
+                Category = x.Category?.Name,
+                Currency = x.Currency?.Name ?? "SP"
             });
             return Json(returnedData);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPage([FromBody] PaginationDataModel model)
+        {
+            try
+            {
+                var Items = await _context.Set<AD>()
+                            .Include(x => x.ADImages)
+                            .Include(x => x.Account)
+                            .Include(x => x.Category)
+                            .Include(x => x.Currency)
+                            .Where(x => x.IsDisabled.GetValueOrDefault() != true)
+                            .Skip(model.Page * model.Count).Take(model.Count).ToListAsync();
+                switch (model.SortingType)
+                {
+                    case SortingType.HighToLowPrice:
+                        Items = Items.OrderByDescending(x => x.Price).ToList();
+                        break;
+                    case SortingType.LowToHighPrice:
+                        Items = Items.OrderBy(x => x.Price).ToList();
+                        break;
+                    case SortingType.MostRecently:
+                    case SortingType.None:
+                    default:
+                        Items = Items.OrderByDescending(x => x.PublishedDate).ToList();
+                        break;
+                }
+                var returnedData = Items.Select(x => new ADDataModel
+                {
+                    ID = x.ID,
+                    Name = x.Name,
+                    CategoryID = x.Category?.ID,
+                    Code = x.Code,
+                    PublishedDate = x.PublishedDate,
+                    Likes = x.FavouriteADs.Count,
+                    Views = x.ADViews,
+                    Price = x.Price,
+                    Title = x.Title,
+                    MainImage = x.GetMainImageRelativePath(),
+                    Category = x.Category?.Name,
+                    Currency = x.Currency?.Name ?? "SP"
+                });
+                return Json(returnedData);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("{ID}")]
@@ -68,11 +124,13 @@ namespace Omni.Controllers.API
                              .ThenInclude(x => x.CategoryFieldOption)
                          .Include(x => x.Account)
                          .Include(x => x.Category)
-                         .Include(x => x.Currency).SingleOrDefault(c => c.ID == ID);
+                         .Include(x => x.Currency)
+                         .Include(x => x.ADImages)
+                         .SingleOrDefault(c => c.ID == ID);
                 if (Item == null)
                     return BadRequest("No Ad related to this ID");
 
-                return new JsonResult(new ADFullDataModel
+                var jsonItem = new ADFullDataModel
                 {
                     ID = Item.ID,
                     IsNegotiable = Item.IsNegotiable,
@@ -91,15 +149,16 @@ namespace Omni.Controllers.API
                     PublishedDate = Item.PublishedDate,
                     Email = Item.Email,
                     Title = Item.Title,
-                    MainImage = Item.ADImages?.FirstOrDefault(y => y.IsMain == true)?.ImagePath,
-                    Images = Item.ADImages?.Where(s => s.IsMain == false).Select(c => c.ImagePath).ToList(),
+                    MainImage = Item.GetMainImageRelativePath(),
+                    Images = Item.ADImages.Where(s => s.IsMain == false).Select(c => c.ImagePath).ToList(),
                     CategoryFieldOptions = Item.ADExtraFields.Select(a => new CategoryFieldOptionDataModel()
                     {
                         CategoryFieldID = a.CategoryFieldOption?.CategoryFieldID,
                         CategoryFieldOptionID = a.CategoryFieldOptionID,
-                        Value = a.CategoryFieldOption?.Name,
+                        Value = a.CategoryFieldOption?.Name
                     }).ToList()
-                });
+                };
+                return new JsonResult(jsonItem);
             }
             catch (Exception ex)
             {
@@ -110,68 +169,80 @@ namespace Omni.Controllers.API
         [HttpPost]
         public async Task<IActionResult> Search([FromBody] SearchDataModel model)
         {
-            var Sort = EnumHelper<SortingType>.Parse(model.SortingType);
-            var ads = _context.Set<AD>().Include(x => x.ADImages)
-                .Include(x => x.Currency)
-                .Include(x => x.Category)
-                    .ThenInclude(x => x.Parent)
+            try
+            {
+                var Sort = EnumHelper<SortingType>.Parse(model.SortingType);
+                var ads = _context.Set<AD>().Include(x => x.ADImages)
+                    .Include(x => x.Currency)
+                    .Include(x => x.Category)
                         .ThenInclude(x => x.Parent)
-                .Where(x => (x.IsDisabled ?? false) == false);
-            if (!string.IsNullOrWhiteSpace(model.SearchWord))
-                ads = ads.Where(x =>
-                    x.Title.ToLower().Contains(model.SearchWord.ToLower()) ||
-                    x.Description.ToLower().Contains(model.SearchWord.ToLower()) ||
-                    x.Email.ToLower().Contains(model.SearchWord.ToLower()) ||
-                    x.Category == null || x.Category.Name.ToLower().Contains(model.SearchWord.ToLower()) ||
-                    x.Code.ToLower().Contains(model.SearchWord.ToLower()) ||
-                    x.Name.ToLower().Contains(model.SearchWord.ToLower()) ||
-                    x.Phone.ToLower().Contains(model.SearchWord.ToLower()));
+                            .ThenInclude(x => x.Parent)
+                    .Where(x => x.IsDisabled.GetValueOrDefault() != true);
 
-            if (model.LowPrice != null)
-                ads = ads.Where(x => x.Price >= model.LowPrice);
+                if (!string.IsNullOrWhiteSpace(model.SearchWord))
+                {
+                    string searchWords = model.SearchWord.ToLower().Trim();
+                    ads = ads.Where(x =>
+                        x.Title.ToLower().Contains(searchWords) ||
+                        x.Description.ToLower().Contains(searchWords) ||
+                        x.Email.ToLower().Contains(searchWords) ||
+                        (x.Category != null && x.Category.Name.ToLower().Contains(searchWords)) ||
+                        x.Code.ToLower().Contains(searchWords) ||
+                        x.Name.ToLower().Contains(searchWords) ||
+                        x.Phone.ToLower().Contains(searchWords));
+                }
 
-            if (model.HighPrice != null)
-                ads = ads.Where(x => x.Price <= model.HighPrice);
+                if (model.LowPrice != null)
+                    ads = ads.Where(x => x.Price >= model.LowPrice);
 
-            if (model.CategoryID != null)
-            {
-                ads = ads.Where(x =>
-                    (x.CategoryID == model.CategoryID) ||
-                    (x.Category != null && x.Category.ParentID == model.CategoryID) ||
-                    (x.Category != null && x.Category.Parent != null && x.Category.Parent.ParentID == model.CategoryID));
+                if (model.HighPrice != null)
+                    ads = ads.Where(x => x.Price <= model.HighPrice);
+
+                if (model.CategoryID != null)
+                {
+                    ads = ads.Where(x =>
+                        (x.CategoryID == model.CategoryID) ||
+                        (x.Category != null && x.Category.ParentID == model.CategoryID) ||
+                        (x.Category != null && x.Category.Parent != null && x.Category.Parent.ParentID == model.CategoryID));
+                }
+
+                switch (Sort)
+                {
+                    case SortingType.None:
+                    case SortingType.MostRecently:
+                    default:
+                        ads = ads.OrderByDescending(s => s.PublishedDate).Skip(model.Page * model.Count).Take(model.Count);
+                        break;
+                    case SortingType.HighToLowPrice:
+                        ads = ads.OrderByDescending(s => s.Price).Skip(model.Page * model.Count).Take(model.Count);
+                        break;
+                    case SortingType.LowToHighPrice:
+                        ads = ads.OrderBy(s => s.Price).Skip(model.Page * model.Count).Take(model.Count);
+                        break;
+                }
+
+                var result = ads.ToList().Select(x => new ADDataModel
+                {
+                    ID = x.ID,
+                    Name = x.Name,
+                    Likes = x.NumberViews,
+                    PublishedDate = x.PublishedDate,
+                    Views = x.ADViews,
+                    Price = x.Price,
+                    Title = x.Title,
+                    MainImage = x.GetMainImageRelativePath(),
+                    CategoryID = x.CategoryID,
+                    Code = x.Code,
+                    Category = x.Category?.Name,
+                    Currency = x.Currency?.Code ?? "SP"
+                });
+
+                return Ok(result);
             }
-            string DefCurrency = _context.Set<Currency>().FirstOrDefault(x => x.IsDefault == true)?.Symbol ?? "SP";
-
-            var result = ads.Select(x => new ADDataModel
+            catch (Exception ex)
             {
-                ID = x.ID,
-                Name = x.Name,
-                Likes = x.NumberViews,
-                PublishedDate = x.PublishedDate,
-                Views = x.ADViews,
-                Price = x.Price,
-                Title = x.Title,
-                MainImage = x.ADImages.FirstOrDefault(y => y.IsMain == true).ImagePath,
-                CategoryID = x.CategoryID,
-                Code = x.Code
-            });
-            List<ADDataModel> FinalResult = new List<ADDataModel>();
-            switch (Sort)
-            {
-                case SortingType.None:
-                    FinalResult = result.OrderByDescending(s => s.PublishedDate).Skip(model.Page * model.Count).Take(model.Count).ToList();
-                    break;
-                case SortingType.MostRecently:
-                    FinalResult = result.OrderByDescending(s => s.PublishedDate).Skip(model.Page * model.Count).Take(model.Count).ToList();
-                    break;
-                case SortingType.HighToLowPrice:
-                    FinalResult = result.OrderByDescending(s => s.Price).Skip(model.Page * model.Count).Take(model.Count).ToList();
-                    break;
-                case SortingType.LowToHighPrice:
-                    FinalResult = result.OrderBy(s => s.Price).Skip(model.Page * model.Count).Take(model.Count).ToList();
-                    break;
+                return BadRequest(ex.Message);
             }
-            return Ok(FinalResult);
         }
 
         [AuthorizeToken]
@@ -188,9 +259,16 @@ namespace Omni.Controllers.API
             if (user == null || account == null) return null;
             #endregion
 
-            var UpAd = _context.Set<AD>().Include(x => x.Category)
-                .Include(x => x.Account).SingleOrDefault(s => s.ID == ID);
+            if (model == null || ModelState.IsValid == false) return BadRequest("Unvalid data model");
+
+            var UpAd = _context.Set<AD>()
+                .Include(x => x.Category)
+                .Include(x => x.Account)
+                .Include(x => x.ADExtraFields)
+                .Include(x => x.ADImages)
+                .SingleOrDefault(s => s.ID == ID);
             if (UpAd == null) return BadRequest("No Ad related to this ID");
+
             try
             {
                 UpAd.CategoryID = model.CategoryID;
@@ -204,65 +282,57 @@ namespace Omni.Controllers.API
                 UpAd.Longitude = model.Longitude;
                 UpAd.Latitude = model.Latitude;
                 UpAd.IsNegotiable = model.IsNegotiable;
+                UpAd.CurrencyID = _context.Set<Currency>().FirstOrDefault(x => x.Code == model.CurrencyName)?.ID;
+
+                _context.Set<AdExtraField>().RemoveRange(UpAd.ADExtraFields);
+                _context.Set<ADImage>().RemoveRange(UpAd.ADImages);
 
                 #region Update Category fields
-                var OldFields = _context.Set<AdExtraField>().Where(s => s.AdID == UpAd.ID).ToList();
-                _context.Set<AdExtraField>().RemoveRange(OldFields);
-
-                if (model.CategoryFieldOptions?.Count > 0)
+                if (model.CategoryFieldOptions != null && model.CategoryFieldOptions.Count > 0)
                 {
                     foreach (var item in model.CategoryFieldOptions)
                     {
-                        var CatFieldOption = _context?.Set<CategoryFieldOption>()?.SingleOrDefault(S => S.ID == item.CategoryFieldOptionID);
-                        _context.Set<AdExtraField>().Add(new AdExtraField
+                        var CatField = _context.Set<CategoryField>().Include(x => x.CategoryFieldOptions).SingleOrDefault(S => S.ID == item.CategoryFieldID);
+                        CategoryFieldOption catOption = CatField.CategoryFieldOptions.FirstOrDefault(x => x.ID == item.CategoryFieldOptionID);
+                        if (CatField == null) continue;
+                        UpAd.ADExtraFields.Add(new AdExtraField
                         {
-                            Ad = UpAd,
-                            CategoryFieldOptionID = item.CategoryFieldOptionID,
-                            Value = CatFieldOption.Name
+                            CategoryFieldOptionID = catOption?.ID,
+                            Value = catOption?.Name ?? item.Value,
+                            Name = CatField.Name
                         });
                     }
                 }
                 #endregion
 
                 #region Update main images
-                if (!string.IsNullOrEmpty(model.MainImage))
+                if (model.MainImage != null && model.MainImage.Length > 0)
                 {
-                    var image = UpAd.ADImages.FirstOrDefault(s => s.IsMain == true);
-                    if (model.MainImage?.Length > 0)
+                    string filename = ImageOperations.SaveImage(model.MainImage, UpAd);
+                    if (!string.IsNullOrWhiteSpace(filename))
                     {
-                        string filename = ImageOperations.SaveImage(model.MainImage, UpAd);
-                        if (!string.IsNullOrEmpty(filename))
+                        UpAd.ADImages.Add(new ADImage()
                         {
-                            ADImage pic = new ADImage()
-                            {
-                                AD = UpAd,
-                                ImagePath = filename,
-                                IsMain = true
-                            };
-                            _context.Set<ADImage>().Add(pic);
-                        }
+                            ImagePath = filename,
+                            IsMain = true
+                        });
                     }
                 }
                 #endregion
 
-                #region Upload Other images
-                if (model?.Images != null)
+                #region Save Other images
+                if (model.Images != null && model.Images.Any(x => x.Length > 0))
                 {
-                    foreach (var file in model.Images)
+                    foreach (var file in model.Images.Where(x => x.Length > 0))
                     {
-                        if (file.Length > 0)
+                        string filename = ImageOperations.SaveImage(file, UpAd);
+                        if (!string.IsNullOrWhiteSpace(filename))
                         {
-                            string filename = ImageOperations.SaveImage(file, UpAd);
-                            if (!string.IsNullOrEmpty(filename))
+                            UpAd.ADImages.Add(new ADImage()
                             {
-                                ADImage pic = new ADImage()
-                                {
-                                    AD = UpAd,
-                                    ImagePath = filename,
-                                    IsMain = false
-                                };
-                                _context.Set<ADImage>().Add(pic);
-                            }
+                                ImagePath = filename,
+                                IsMain = false
+                            });
                         }
                     }
                 }
@@ -291,6 +361,8 @@ namespace Omni.Controllers.API
             if (user == null || account == null) return null;
             #endregion
 
+            if (model == null || ModelState.IsValid == false) return BadRequest("Unvalid data model");
+
             try
             {
                 #region Create new AD
@@ -312,39 +384,41 @@ namespace Omni.Controllers.API
                     Latitude = model.Latitude,
                     AccountID = account.ID,
                     IsDisabled = false,
-                    Price = model.Price ?? 0
+                    Price = (model.Price ?? 0) < 0 ? 0 : model.Price,
+                    CurrencyID = _context.Set<Currency>().FirstOrDefault(x => x.Code == model.CurrencyName)?.ID,
+                    PriceType = PriceType.Cash.ToString(),
+                    ContactWay = ContactWay.Both.ToString(),
                 };
-                newAd.GenerateCode(_context);
+                bool codeGenerated = await newAd.GenerateCode(_context);
+                if (codeGenerated == false) return BadRequest("Error in generate code");
                 #endregion
 
                 #region Ad category fields
-                if (model.CategoryFieldOptions?.Count > 0)
+                if (model.CategoryFieldOptions != null && model.CategoryFieldOptions.Count > 0)
                 {
                     foreach (var item in model.CategoryFieldOptions)
                     {
-                        var CatField = _context.Set<CategoryField>().SingleOrDefault(S => S.ID == item.CategoryFieldID);
-                        CategoryFieldOption catOption = await _context.Set<CategoryFieldOption>().Include(x => x.CategoryField).FirstOrDefaultAsync(x => x.ID == item.CategoryFieldOptionID);
-                        if (catOption == null) continue;
-                        _context.Set<AdExtraField>().Add(new AdExtraField
+                        var CatField = _context.Set<CategoryField>().Include(x => x.CategoryFieldOptions).SingleOrDefault(S => S.ID == item.CategoryFieldID);
+                        CategoryFieldOption catOption = CatField.CategoryFieldOptions.FirstOrDefault(x => x.ID == item.CategoryFieldOptionID);
+                        if (CatField == null) continue;
+                        newAd.ADExtraFields.Add(new AdExtraField
                         {
-                            Ad = newAd,
-                            CategoryFieldOptionID = item.CategoryFieldOptionID,
-                            Value = catOption?.Name,
-                            Name = CatField?.Name
+                            CategoryFieldOptionID = catOption?.ID,
+                            Value = catOption?.Name ?? item.Value,
+                            Name = CatField.Name
                         });
                     }
                 }
                 #endregion
 
-                #region Upload Main Image
-                if (model.MainImage?.Length > 0)
+                #region Save Main Image
+                if (model.MainImage != null && model.MainImage.Length > 0)
                 {
                     string filename = ImageOperations.SaveImage(model.MainImage, newAd);
-                    if (!string.IsNullOrEmpty(filename))
+                    if (!string.IsNullOrWhiteSpace(filename))
                     {
-                        _context.Set<ADImage>().Add(new ADImage()
+                        newAd.ADImages.Add(new ADImage()
                         {
-                            AD = newAd,
                             ImagePath = filename,
                             IsMain = true
                         });
@@ -352,17 +426,16 @@ namespace Omni.Controllers.API
                 }
                 #endregion
 
-                #region Upload Other images
-                if (model?.Images != null)
+                #region Save Other images
+                if (model.Images != null && model.Images.Any(x => x.Length > 0))
                 {
                     foreach (var file in model.Images.Where(x => x.Length > 0))
                     {
                         string filename = ImageOperations.SaveImage(file, newAd);
-                        if (!string.IsNullOrEmpty(filename))
+                        if (!string.IsNullOrWhiteSpace(filename))
                         {
-                            _context.Set<ADImage>().Add(new ADImage()
+                            newAd.ADImages.Add(new ADImage()
                             {
-                                AD = newAd,
                                 ImagePath = filename,
                                 IsMain = false
                             });
@@ -394,6 +467,8 @@ namespace Omni.Controllers.API
                 .FirstOrDefault(x => x.ID == user.AccountID);
             if (user == null || account == null) return null;
             #endregion
+
+            if (account.ADs == null) return BadRequest("Error in Get ads account");
 
             var Ad = account.ADs.SingleOrDefault(x => x.ID == ID);
             if (Ad == null) return BadRequest("No ad related to this ID");

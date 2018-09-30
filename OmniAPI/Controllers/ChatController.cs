@@ -48,6 +48,7 @@ namespace OmniAPI.Controllers.API
 
                 var chat = account.Chats.FirstOrDefault(x => x.ID == model.ChatID);
                 if (chat == null) return BadRequest("Chat ID is not related to any Chat");
+
                 var messages = chat.Messages.OrderBy(x => x.SentDate).Select(msg => new ChatMessageDataModel()
                 {
                     Body = msg.Body,
@@ -58,8 +59,10 @@ namespace OmniAPI.Controllers.API
                     Title = msg.Title,
                     ImagePath = msg.FilePath
                 }).Skip(model.Page * model.Count).Take(model.Count).ToList();
-                chat.Messages.Where(x => x.SeenDate == null).ForEach(x => x.SeenDate = DateTime.UtcNow);
+
+                messages.Where(x => x.SeenDate == null).ForEach(x => x.SeenDate = DateTime.UtcNow);
                 await _context.SubmitAsync();
+
                 return Json(messages);
             }
             catch (Exception ex)
@@ -68,8 +71,8 @@ namespace OmniAPI.Controllers.API
             }
         }
 
-        [AuthorizeToken]
         [HttpPost]
+        [AuthorizeToken]
         public async Task<IActionResult> SendMessage([FromBody]MessageDataModel model)
         {
             #region Check user
@@ -111,16 +114,16 @@ namespace OmniAPI.Controllers.API
                     SenderAccountID = account.ID,
                     ReceiverAccountID = ad.AccountID,
                     SenderName = model.SenderName,
-                    ChatID = chat.ID,
+                    Chat = chat,
                     SeenDate = null
                 };
-                _context.Messages.Add(message);
-
-                if (model.Attachment != null || model.Attachment.Length != 0)
+                if (model.Attachment != null || model.Attachment.Length > 0)
                 {
                     string path = ImageOperations.SaveImage(model.Attachment, message);
                     message.FilePath = path;
                 }
+
+                _context.Messages.Add(message);
                 await _context.SubmitAsync();
                 return Ok();
             }
