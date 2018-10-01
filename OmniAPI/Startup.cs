@@ -121,6 +121,16 @@ namespace OmniAPI
 
             services.AddMvc();
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AnyOrigin", builder =>
+                {
+                    builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod();
+                });
+            });
+
             #region Configure Email
             EmailService.AppName = "OMNI Application";
             EmailService.SenderName = "OMNI Team";
@@ -142,6 +152,10 @@ namespace OmniAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            // Configure
+            app.UseCors("AnyOrigin");
+
             app.UseStaticFiles();
             app.UseMvc();
             //Context.Database.Migrate();

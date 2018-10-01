@@ -167,7 +167,7 @@ namespace Omni.Controllers.API
         }
 
         [HttpPost]
-        public async Task<IActionResult> Search([FromBody] SearchDataModel model)
+        public IActionResult Search([FromBody] SearchDataModel model)
         {
             try
             {
@@ -211,13 +211,13 @@ namespace Omni.Controllers.API
                     case SortingType.None:
                     case SortingType.MostRecently:
                     default:
-                        ads = ads.OrderByDescending(s => s.PublishedDate).Skip(model.Page * model.Count).Take(model.Count);
+                        ads = ads.OrderByDescending(s => s.PublishedDate).Skip(model.Page * model.Count ?? 0).Take(model.Count ?? 10);
                         break;
                     case SortingType.HighToLowPrice:
-                        ads = ads.OrderByDescending(s => s.Price).Skip(model.Page * model.Count).Take(model.Count);
+                        ads = ads.OrderByDescending(s => s.Price).Skip(model.Page * model.Count ?? 0).Take(model.Count ?? 10);
                         break;
                     case SortingType.LowToHighPrice:
-                        ads = ads.OrderBy(s => s.Price).Skip(model.Page * model.Count).Take(model.Count);
+                        ads = ads.OrderBy(s => s.Price).Skip(model.Page * model.Count ?? 0).Take(model.Count ?? 10);
                         break;
                 }
 
