@@ -121,13 +121,23 @@ namespace NavaraAPI.Controllers
                 //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
 
                 if (account.Cart == null)
-                    return BadRequest("This account is not related to any cart");
+                {
+                    account.Cart = new Cart()
+                    {
+                        CreationDate = DateTime.Now,
+                        TotalAmount = 0,
+                        LastPurchase = DateTime.Now,
+                    };
+                    await _Context.SaveChangesAsync();
+                }
+                //return BadRequest("This account is not related to any cart");
 
                 await account.Cart.UpdateCart(_Context);
                 var json = new JsonResult(new CartViewModel()
                 {
                     CreatedDate = account.Cart.CreationDate,
-                    Items = account.Cart.CartItems.Select(x => new CartItemViewModel
+                    AccountID = account.ID,
+                    Items = account.Cart.CartItems?.Select(x => new CartItemViewModel
                     {
                         ItemID = x.ItemID,
                         ItemName = x.Item?.Name,
@@ -141,7 +151,7 @@ namespace NavaraAPI.Controllers
                         Total = x.Total,
                         UnitNetPrice = x.UnitNetPrice,
                         UnitPrice = x.UnitPrice
-                    }).ToList()
+                    })?.ToList()
                 });
                 return json;
             }

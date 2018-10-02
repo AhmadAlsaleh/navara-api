@@ -59,7 +59,8 @@ namespace NavaraAPI.Controllers
                     };
                     order.OrderItems.Add(orderItem);
                 }
-                order.GenerateCode(_context as NavaraDbContext);
+                if (order.GenerateCode(_context as NavaraDbContext) == false)
+                    return BadRequest("Error while generating Order Code");
                 this._context.Set<Order>().Add(order);
                 await this._context.SaveChangesAsync();
                 await order.UpdateOrder(_context);
@@ -67,7 +68,7 @@ namespace NavaraAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex.Message);
             }
         }
 
@@ -89,6 +90,11 @@ namespace NavaraAPI.Controllers
                     .SingleOrDefaultAsync(x => x.ID == id);
                 if (order == null) return NotFound("id is not realted to any order");
                 if (order.AccountID != user.AccountID) return BadRequest("This Order is not related to the authorized user");
+                if (order.Number == null)
+                {
+                    order.GenerateCode(_context as NavaraDbContext);
+                    await _context.SaveChangesAsync();
+                }
                 var json = new JsonResult(new OrderModel()
                 {
                     ID = order.ID,

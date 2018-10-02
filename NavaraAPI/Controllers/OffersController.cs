@@ -27,6 +27,7 @@ namespace NavaraAPI.Controllers
             try
             {
                 var offer = await _context.Set<Offer>()
+                    .Include(x => x.Item)
                     .Include(x => x.OfferItems)
                         .ThenInclude(x => x.Item)
                             .ThenInclude(x => x.ItemCategory)
