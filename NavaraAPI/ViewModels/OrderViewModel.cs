@@ -16,6 +16,12 @@ namespace NavaraAPI.ViewModels
         public string Name { get; set; }
         public string Mobile { get; set; }
         public string Remark { get; set; }
+        public string Status { set; get; }
+        public string Code { set; get; }
+        public DateTime? Date { get; set; }
+        public double? TotalPrices { set; get; }
+        public double? TotalDiscount { set; get; }
+        public double? NetTotalPrices { set; get; }
     }
 
     public class OrderBasicModel

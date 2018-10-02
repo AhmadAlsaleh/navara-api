@@ -105,6 +105,13 @@ namespace NavaraAPI.Controllers
                     Mobile = order.Mobile,
                     Remark = order.Remark,
                     ToTime = order.ToTime?.ToShortTimeString(),
+                    Code = order.Code,
+                    Date = order.CreationDate,
+                    TotalPrices = order.OrderItems.Sum(y => (y.UnitPrice ?? 0) * (y.Quantity ?? 1)),
+                    TotalDiscount = order.OrderItems.Sum(y => y.UnitDiscount ?? 0),
+                    NetTotalPrices = order.OrderItems.Sum(y => y.Total ?? 0),
+                    Status = order.Status,
+
                     OrderItems = order.OrderItems.Select(y => new OrderItemModel
                     {
                         OrderItemID = y.ID,
