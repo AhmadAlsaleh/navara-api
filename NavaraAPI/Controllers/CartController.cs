@@ -52,6 +52,7 @@ namespace NavaraAPI.Controllers
                 }
                 _context.Set<CartItem>().Remove(cartItem);
                 await _context.SaveChangesAsync();
+                await account.Cart.FixMissingOfferItems(_context);
                 await account.Cart.UpdateCart(_context);
                 return NoContent();
             }
@@ -117,6 +118,7 @@ namespace NavaraAPI.Controllers
                 #endregion
 
                 await _context.SaveChangesAsync();
+                await account.Cart.FixMissingOfferItems(_context);
                 await account.Cart.UpdateCart(_context);
                 return NoContent();
             }
@@ -222,6 +224,7 @@ namespace NavaraAPI.Controllers
                 #endregion
 
                 await _context.SaveChangesAsync();
+                await account.Cart.FixMissingOfferItems(_context);
                 await account.Cart.UpdateCart(_context);
                 return NoContent();
             }

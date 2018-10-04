@@ -2,6 +2,10 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/NavaraAPI",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:64922/",
       "sslPort": 0
@@ -11,7 +15,6 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -19,7 +22,6 @@
     "NavaraAPI": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "/",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

@@ -58,11 +58,14 @@ namespace NavaraAPI.Controllers
                         OfferID = record.OfferID
                     };
                     order.OrderItems.Add(orderItem);
+                    var item = account.Cart.CartItems.FirstOrDefault(x => x.ItemID == record.OrderItemID);
+                    if (item != null) account.Cart.CartItems.Remove(item);
                 }
                 if (order.GenerateCode(_context as NavaraDbContext) == false)
                     return BadRequest("Error while generating Order Code");
                 this._context.Set<Order>().Add(order);
                 await this._context.SaveChangesAsync();
+                await order.FixMissingOfferItems(_context);
                 await order.UpdateOrder(_context);
                 return Json(new { OrderCode = order.Code });
             }

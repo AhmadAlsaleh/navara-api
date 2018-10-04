@@ -17,6 +17,8 @@ using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Omni;
 using SmartLifeLtd.Data.Tables.Shared;
+using SmartLifeLtd.IServices;
+using SmartLifeLtd.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,18 +34,19 @@ namespace Omni.Controllers.API
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger _logger;
         private readonly UserManager<ApplicationUser> _userManager;
-
+        private readonly IUsersService _usersService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILoggerFactory loggerFactory,
+            ILoggerFactory loggerFactory, IUsersService usersService,
             OmniDbContext context, LogDbContext logContext
            ) : base(context)
         {
             _signInManager = signInManager;
             _logger = loggerFactory.CreateLogger<AccountController>();
             _userManager = userManager;
+            _usersService = usersService;
         }
 
         [HttpGet]
@@ -110,7 +113,7 @@ namespace Omni.Controllers.API
                         ID = ad.ID,
                         Name = ad.Name,
                         Title = ad.Title,
-                        Currency = ad.Currency?.Symbol ?? "SP",
+                        Currency = ad.Currency?.Code ?? "SP",
                         Price = ad.Price,
                         Code = ad.Code,
                         Views = ad.ADViews,
@@ -203,6 +206,34 @@ namespace Omni.Controllers.API
             return Ok(accountInfo);
         }
 
+        [AuthorizeToken]
+        [HttpPost]
+        public async Task<IActionResult> UpdateInformation([FromBody]UpdateUserInformationDataModel userInfo)
+        {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var userID = HttpContext.User.Identity.Name;
+                    if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+                    ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+                    Account account = _context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
+                    if (user == null || account == null) return null;
+
+                    var result = await _usersService.UpdateUserInformation(userID, userInfo);
+                    if ((bool?)result == true)
+                        return Ok();
+                    else return BadRequest("Faild in save data");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+            return BadRequest("Invaild information please check the sent information and try again");
+        }
+
+
         #region Favorite
         [AuthorizeToken]
         [HttpGet("{ID}")]
@@ -252,13 +283,13 @@ namespace Omni.Controllers.API
             List<ADDataModel> Data = new List<ADDataModel>();
             foreach (var favAd in account.FavouriteADs)
             {
-                if (favAd.AD == null || favAd.AD.IsDisabled.GetValueOrDefault() == false) continue;
+                if (favAd.AD == null || favAd.AD.IsDisabled.GetValueOrDefault() == true) continue;
                 var item = new ADDataModel()
                 {
                     ID = favAd.AD.ID,
                     Name = favAd.AD.Name,
                     Title = favAd.AD.Title,
-                    Currency = favAd.AD.Currency?.Name,
+                    Currency = favAd.AD.Currency?.Code ?? "SP",
                     Price = favAd.AD.Price,
                     Code = favAd.AD.Code,
                     Views = favAd.AD.ADViews,

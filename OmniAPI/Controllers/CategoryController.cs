@@ -171,7 +171,7 @@ namespace OmniAPI.Controllers
                     Code = x.Code,
                     MainImage = x.GetMainImageRelativePath(),
                     Category = x.Category?.Name,
-                    Currency = x.Currency?.Name
+                    Currency = x.Currency?.Code ?? "SP"
                 });
                 return Ok(data);
             }

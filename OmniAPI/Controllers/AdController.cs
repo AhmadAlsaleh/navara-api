@@ -60,7 +60,7 @@ namespace Omni.Controllers.API
                 Title = x.Title,
                 MainImage = x.GetMainImageRelativePath(),
                 Category = x.Category?.Name,
-                Currency = x.Currency?.Name ?? "SP"
+                Currency = x.Currency?.Code ?? "SP"
             });
             return Json(returnedData);
         }
@@ -104,7 +104,7 @@ namespace Omni.Controllers.API
                     Title = x.Title,
                     MainImage = x.GetMainImageRelativePath(),
                     Category = x.Category?.Name,
-                    Currency = x.Currency?.Name ?? "SP"
+                    Currency = x.Currency?.Code ?? "SP"
                 });
                 return Json(returnedData);
             }
@@ -138,7 +138,7 @@ namespace Omni.Controllers.API
                     CategoryID = Item.CategoryID,
                     CategoryName = Item.Category?.Name,
                     Code = Item.Code,
-                    CurrencyName = Item.Currency?.Name,
+                    CurrencyName = Item.Currency?.Code ?? "SP",
                     Description = Item.Description,
                     Name = Item.Name,
                     Phone = Item.Phone,
@@ -388,6 +388,7 @@ namespace Omni.Controllers.API
                     CurrencyID = _context.Set<Currency>().FirstOrDefault(x => x.Code == model.CurrencyName)?.ID,
                     PriceType = PriceType.Cash.ToString(),
                     ContactWay = ContactWay.Both.ToString(),
+                    PublishedDate = DateTime.Now
                 };
                 bool codeGenerated = await newAd.GenerateCode(_context);
                 if (codeGenerated == false) return BadRequest("Error in generate code");
