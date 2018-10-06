@@ -121,7 +121,8 @@ namespace Omni.Controllers.API
                         Likes = ad.FavouriteADs.Count(),
                         Category = ad.Category?.Name,
                         PublishedDate = ad.PublishedDate,
-                        MainImage = ad.GetMainImageRelativePath()
+                        MainImage = ad.GetMainImageRelativePath(),
+                        IsOwner = true
                     };
                     Data.Add(item);
                 }
@@ -297,7 +298,8 @@ namespace Omni.Controllers.API
                     Category = favAd.AD.Category?.Name,
                     CategoryID = favAd.AD.CategoryID,
                     PublishedDate = favAd.AD.PublishedDate,
-                    MainImage = favAd.AD.GetMainImageRelativePath()
+                    MainImage = favAd.AD.GetMainImageRelativePath(),
+                    IsOwner = favAd.AccountID == account.ID
                 };
 
                 Data.Add(item);

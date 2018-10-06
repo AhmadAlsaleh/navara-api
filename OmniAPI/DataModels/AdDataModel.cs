@@ -42,6 +42,7 @@ namespace OmniAPI.Models
         public string Code { get; set; }
         public double? Price { get; set; }
         public string Currency { get; set; }
+        public bool? IsOwner { get; set; }
 
         public Guid? CategoryID { get; set; }
         public string Category { get; set; }

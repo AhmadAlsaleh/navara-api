@@ -11,6 +11,7 @@ using System.IO;
 using OmniAPI.Models;
 using SmartLifeLtd.API;
 using OmniAPI.Classes;
+using Microsoft.AspNetCore.Http;
 
 namespace OmniAPI.Controllers
 {
@@ -145,6 +146,19 @@ namespace OmniAPI.Controllers
         {
             try
             {
+                #region Check user
+                Account account = null;
+                ApplicationUser user = null;
+                var userID = HttpContext.User.Identity.Name;
+                if (userID != null)
+                {
+                    user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+                    account = _context.Set<Account>()
+                        .Include(x => x.Searches)
+                        .FirstOrDefault(x => x.ID == user.AccountID);
+                }
+                #endregion
+
                 var items = _context.Set<AD>()
                     .Include(x => x.ADImages)
                     .Include(x => x.Account)
@@ -171,7 +185,8 @@ namespace OmniAPI.Controllers
                     Code = x.Code,
                     MainImage = x.GetMainImageRelativePath(),
                     Category = x.Category?.Name,
-                    Currency = x.Currency?.Code ?? "SP"
+                    Currency = x.Currency?.Code ?? "SP",
+                    IsOwner = x.AccountID == account?.ID
                 });
                 return Ok(data);
             }
