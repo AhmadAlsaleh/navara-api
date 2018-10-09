@@ -197,7 +197,7 @@ namespace Omni.Controllers.API
         }
 
         [HttpPost]
-        [AuthorizeToken]
+        //[AuthorizeToken]
         public async Task<IActionResult> Search([FromBody] SearchDataModel model)
         {
             #region Check user

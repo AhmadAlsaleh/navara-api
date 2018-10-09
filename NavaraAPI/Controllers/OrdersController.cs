@@ -65,7 +65,7 @@ namespace NavaraAPI.Controllers
                     return BadRequest("Error while generating Order Code");
                 this._context.Set<Order>().Add(order);
                 await this._context.SaveChangesAsync();
-                await order.FixMissingOfferItems(_context);
+                //await order.FixMissingOfferItems(_context);
                 await order.UpdateOrder(_context);
                 return Json(new { OrderCode = order.Code });
             }
