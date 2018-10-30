@@ -38,12 +38,13 @@ namespace NavaraAPI.Controllers
                 {
                     ID = offer.ID,
                     Title = offer.Title,
-                    Price = offer.Price,
+                    ItemName = offer.Item?.Name,
+                    Price = offer.Price ?? ((offer.Item?.Price ?? 0) - ((offer.Item?.Price ?? 0) * (offer.Discount ?? 0) / 100.0)),
                     Discount = offer.Discount,
-                    UnitNetPrice = ( offer.Item?.Price ?? 0) - ((offer.Item?.Price ?? 0) * (offer.Discount ?? 0) / 100.0),
+                    UnitNetPrice = offer.Price ?? ((offer.Item?.Price ?? 0) - ((offer.Item?.Price ?? 0) * (offer.Discount ?? 0) / 100.0)),
                     UnitPrice = offer.Item?.Price ?? 0,
                     Description = offer.Description,
-                    ThumbnailImagePath = offer.ThumbnailImagePath,
+                    ThumbnailImagePath = offer.Item?.ThumbnailImagePath,
                     IsActive = offer.IsActive,
                     ShortDescription = offer.ShortDescription,
                     OfferType = offer.OfferType,
@@ -79,11 +80,12 @@ namespace NavaraAPI.Controllers
                 {
                     ID = x.ID,
                     Title = x.Title,
+                    ItemName = x.Item?.Name,
                     ThumbnailImagePath = x.ThumbnailImagePath,
                     ShortDescription = x.ShortDescription,
                     OfferType = x.OfferType,
                     Discount = x.Discount,
-                    UnitNetPrice = (x.Item?.Price ?? 0) - ((x.Item?.Price  ?? 0) * (x.Discount ?? 0) / 100.0),
+                    UnitNetPrice = x.Price ?? ((x.Item?.Price ?? 0) - ((x.Item?.Price ?? 0) * (x.Discount ?? 0) / 100.0)),
                     UnitPrice = x.Item?.Price
                 }));
                 return json;

@@ -44,7 +44,7 @@ namespace NavaraAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Offer([FromBody]GetChangesModel model) {
             if (model == null) return null;
-            var Inserted = await _Context.Set<Offer>().Where(x => x.CreationDate >= model.LastUpdate).Select(x =>
+            var Inserted = await _Context.Set<Offer>().Include(x => x.Item).Where(x => x.CreationDate >= model.LastUpdate).Select(x =>
                 new OfferModel
                 {
                     Description = x.Description,
@@ -52,6 +52,7 @@ namespace NavaraAPI.Controllers
                     IsActive = x.IsActive,
                     OfferType = x.OfferType,
                     ItemID = x.ItemID,
+                    ItemName = x.Item.Name,
                     Price = x.Price,
                     ShortDescription = x.Description,
                     ThumbnailImagePath = x.ThumbnailImagePath,
@@ -65,6 +66,7 @@ namespace NavaraAPI.Controllers
                     IsActive = x.IsActive,
                     OfferType = x.OfferType,
                     ItemID = x.ItemID,
+                    ItemName = x.Item.Name,
                     Price = x.Price,
                     ShortDescription = x.Description,
                     ThumbnailImagePath = x.ThumbnailImagePath,

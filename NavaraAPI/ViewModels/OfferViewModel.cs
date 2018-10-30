@@ -9,6 +9,7 @@ namespace NavaraAPI.ViewModels
     {
         public Guid ID { set; get; }
         public string Title { get; set; }
+        public string ItemName { get; set; }
         public double? Price { get; set; }
         public string Description { get; set; }
         public string ShortDescription { get; set; }
@@ -22,6 +23,7 @@ namespace NavaraAPI.ViewModels
     {
         public Guid ID { set; get; }
         public string Title { get; set; }
+        public string ItemName { get; set; }
         public double? Price { get; set; }
         public string Description { get; set; }
         public string ShortDescription { get; set; }
@@ -39,6 +41,7 @@ namespace NavaraAPI.ViewModels
     {
         public Guid ID { set; get; }
         public string Title { get; set; }
+        public string ItemName { get; set; }
         public string ShortDescription { get; set; }
         public string OfferType { get; set; }
         public string ThumbnailImagePath { get; set; }

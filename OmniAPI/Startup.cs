@@ -136,7 +136,6 @@ namespace OmniAPI
             EmailService.SenderName = "OMNI Team";
             EmailService.ConfirmationURL = "http://OMNIAPI.Smartlife-solutions.com/Users/Confirm?token={0}&UserID={1}";
             EmailService.ResetURL = "http://OMNIAPI.Smartlife-solutions.com/Users/ResetPassword?token={0}&UserID={1}";
-            EmailService.ConfirmURL = "http://OMNIAPI.Smartlife-solutions.com/Users/ConfirmEmail";
             #endregion
         }
 

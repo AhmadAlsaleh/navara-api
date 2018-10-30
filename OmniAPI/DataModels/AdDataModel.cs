@@ -16,6 +16,7 @@ namespace OmniAPI.Models
         public string Phone { get; set; }
         public string Email { get; set; }
         public double? Price { get; set; }
+        public bool? IsOwner { get; set; }
 
         public Guid? CategoryID { get; set; }
         public string CategoryName  { get; set; }

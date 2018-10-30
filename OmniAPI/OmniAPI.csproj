@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj" />
+    <ProjectReference Include="..\..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj" />
   </ItemGroup>
 
 </Project>

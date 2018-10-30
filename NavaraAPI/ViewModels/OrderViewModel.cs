@@ -22,6 +22,7 @@ namespace NavaraAPI.ViewModels
         public double? TotalPrices { set; get; }
         public double? TotalDiscount { set; get; }
         public double? NetTotalPrices { set; get; }
+        public bool? UseWallet { set; get; }
     }
 
     public class OrderBasicModel

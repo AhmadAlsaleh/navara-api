@@ -52,7 +52,7 @@ namespace NavaraAPI.Controllers
                 }
                 _context.Set<CartItem>().Remove(cartItem);
                 await _context.SaveChangesAsync();
-                //await account.Cart.FixMissingOfferItems(_context);
+                await account.Cart.FixMissingOfferItems(_context);
                 await account.Cart.UpdateCart(_context);
                 return NoContent();
             }
@@ -224,6 +224,38 @@ namespace NavaraAPI.Controllers
                 #endregion
 
                 await _context.SaveChangesAsync();
+                //await account.Cart.FixMissingOfferItems(_context);
+                await account.Cart.UpdateCart(_context);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+
+        [AuthorizeToken]
+        [HttpPost]
+        public async Task<IActionResult> RemoveOfferFromCart([FromBody]CartOfferViewModel model)
+        {
+            try
+            {
+                #region Check user
+                var userID = HttpContext.User.Identity.Name;
+                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+                ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+                Account account = _context.Set<Account>()
+                    .Include(x => x.Cart)
+                        .ThenInclude(x => x.CartItems)
+                    .FirstOrDefault(x => x.ID == user.AccountID);
+                if (user == null || account == null) return null;
+                //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
+                #endregion
+
+                var cartItems = account.Cart?.CartItems.Where(x => x.OfferID == model.OfferID);
+                if (cartItems == null) return NoContent();
+                _context.Set<CartItem>().RemoveRange(cartItems);
+                await _context.SaveChangesAsync();
                 await account.Cart.FixMissingOfferItems(_context);
                 await account.Cart.UpdateCart(_context);
                 return NoContent();
@@ -233,5 +265,6 @@ namespace NavaraAPI.Controllers
                 return BadRequest();
             }
         }
+
     }
 }

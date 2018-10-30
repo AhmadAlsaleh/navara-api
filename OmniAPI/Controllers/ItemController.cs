@@ -36,7 +36,7 @@ namespace Omni.Controllers.API
         }
 
         [HttpGet]
-        [AuthorizeToken]
+        //[AuthorizeToken]
         public override async Task<IActionResult> Get()
         {
             #region Check user
@@ -81,7 +81,7 @@ namespace Omni.Controllers.API
         }
 
         [HttpGet]
-        [AuthorizeToken]
+        //[AuthorizeToken]
         public async Task<IActionResult> GetPage([FromBody] PaginationDataModel model)
         {
             #region Check user
@@ -145,8 +145,20 @@ namespace Omni.Controllers.API
         }
 
         [HttpGet("{ID}")]
+        //[AuthorizeToken]
         public override async Task<IActionResult> GetById(Guid ID)
         {
+            #region Check user
+            Account account = null;
+            ApplicationUser user = null;
+            var userID = HttpContext.User.Identity.Name;
+            if (userID != null)
+            {
+                user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+                account = _context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
+            }
+            #endregion
+
             try
             {
                 var Item = _context.Set<AD>()
@@ -168,6 +180,7 @@ namespace Omni.Controllers.API
                     CategoryID = Item.CategoryID,
                     CategoryName = Item.Category?.Name,
                     Code = Item.Code,
+                    IsOwner = Item.AccountID == account?.ID,
                     CurrencyName = Item.Currency?.Code ?? "SP",
                     Description = Item.Description,
                     Name = Item.Name,

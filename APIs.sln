@@ -7,7 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NavaraAPI", "NavaraAPI\Nava
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OmniAPI", "OmniAPI\OmniAPI.csproj", "{AA125AE5-8FDF-4F78-BE4D-74FE008D0357}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartlifeLtd", "..\..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj", "{FC3B5F74-15F2-404D-9DF9-3F4423C8EA79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartlifeLtd", "..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj", "{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NavaraStore", "..\NavaraWebsite\NavaraStore\NavaraStore.csproj", "{5FCDB603-40AF-4DCC-9039-46964D5BC615}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iShipAPI", "..\..\iShip\iShipAPI\iShipAPI\iShipAPI.csproj", "{B984F835-2682-48DA-8425-5F7258909EA8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,16 +21,24 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{AA125AE5-8FDF-4F78-BE4D-74FE008D0357}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AA125AE5-8FDF-4F78-BE4D-74FE008D0357}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AA125AE5-8FDF-4F78-BE4D-74FE008D0357}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AA125AE5-8FDF-4F78-BE4D-74FE008D0357}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FC3B5F74-15F2-404D-9DF9-3F4423C8EA79}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FC3B5F74-15F2-404D-9DF9-3F4423C8EA79}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FC3B5F74-15F2-404D-9DF9-3F4423C8EA79}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FC3B5F74-15F2-404D-9DF9-3F4423C8EA79}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA125AE5-8FDF-4F78-BE4D-74FE008D0357}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA125AE5-8FDF-4F78-BE4D-74FE008D0357}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{5FCDB603-40AF-4DCC-9039-46964D5BC615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FCDB603-40AF-4DCC-9039-46964D5BC615}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FCDB603-40AF-4DCC-9039-46964D5BC615}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FCDB603-40AF-4DCC-9039-46964D5BC615}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{B984F835-2682-48DA-8425-5F7258909EA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B984F835-2682-48DA-8425-5F7258909EA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B984F835-2682-48DA-8425-5F7258909EA8}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{B984F835-2682-48DA-8425-5F7258909EA8}.Release|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

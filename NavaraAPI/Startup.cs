@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using SmartLifeLtd.Data.Tables.Navara;
 using SmartLifeLtd.Services;
 using SmartLifeLtd.IServices;
+using NavaraAPI.Controllers;
 
 namespace NavaraAPI
 {
@@ -60,10 +61,10 @@ namespace NavaraAPI
             services.AddScoped<IUsersService, UsersService<Account, NavaraDbContext>>();
             // AddIdentity adds cookie based authentication
             // Adds scoped classes for things like UserManager, SignInManager, PasswordHashers etc..
-            services.AddIdentity<ApplicationUser, IdentityRole>(optoins =>
+            services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(optoins =>
             {
                 //Onyl unique emails
-                optoins.User.RequireUniqueEmail = true;
+                optoins.User.RequireUniqueEmail = false;
                 optoins.Password.RequireDigit = false;
                 optoins.Password.RequiredLength = 6;
                 optoins.Password.RequiredUniqueChars = 0;
@@ -119,13 +120,13 @@ namespace NavaraAPI
             });
 
             services.AddMvc();
+            services.AddSignalR();
 
             #region Configure Email
             EmailService.AppName = "Navara Store";
             EmailService.SenderName = "Navara Store Team";
-            EmailService.ConfirmationURL = "http://api.navarastore.com/Users/ConfirmAccount?token={0}&userid={1}";
-            EmailService.ResetURL = "http://api.navarastore.com/Users/ResetPassword?token={0}&UserID={1}";
-            EmailService.ConfirmURL = "http://api.navarastore.com/User/ConfirmEmail/";
+            EmailService.ConfirmationURL = "http://navarastore.com/Users/ConfirmAccount?token={0}&userid={1}";
+            EmailService.ResetURL = "http://navarastore.com/Users/ResetPassword?token={0}&userid={1}";
             EmailService.SenderEmail = "noreply@navarastore.com";
             EmailService.Password = "P@ssw0rd";
             EmailService.ServerMailHost = "mi3-wts6.a2hosting.com";
@@ -149,7 +150,10 @@ namespace NavaraAPI
             app.UseStaticFiles();
             app.UseMvc();
             Context.Database.Migrate();
-
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<ChatHub>("/chatHub");
+            });
         }
     }
 }

@@ -84,19 +84,24 @@ namespace Omni.Controllers.API
         public async Task<IActionResult> GetOwnItems()
         {
             #region Check user
+            Account account = null;
+            ApplicationUser user = null;
             var userID = HttpContext.User.Identity.Name;
             if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-            ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
-            Account account = _context.Set<Account>()
-                .Include(x => x.ADs)
-                    .ThenInclude(x => x.ADImages)
-                .Include(x => x.ADs)
-                    .ThenInclude(x => x.Currency)
-                .Include(x => x.ADs)
-                    .ThenInclude(x => x.Category)
-                .Include(x => x.ADs)
-                    .ThenInclude(x => x.FavouriteADs)
-                .FirstOrDefault(x => x.ID == user.AccountID);
+            user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+            if (user != null)
+            {
+                account = _context.Set<Account>()
+                    .Include(x => x.ADs)
+                        .ThenInclude(x => x.ADImages)
+                    .Include(x => x.ADs)
+                        .ThenInclude(x => x.Currency)
+                    .Include(x => x.ADs)
+                        .ThenInclude(x => x.Category)
+                    .Include(x => x.ADs)
+                        .ThenInclude(x => x.FavouriteADs)
+                    .FirstOrDefault(x => x.ID == user.AccountID);
+            }
             if (user == null || account == null) return null;
             #endregion
 
@@ -136,16 +141,21 @@ namespace Omni.Controllers.API
         public async Task<IActionResult> GetChats()
         {
             #region Check user
+            Account account = null;
+            ApplicationUser user = null;
             var userID = HttpContext.User.Identity.Name;
             if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-            ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
-            Account account = _context.Set<Account>()
-                .Include(x => x.Chats)
-                    .ThenInclude(x => x.AD)
-                        .ThenInclude(x => x.ADImages)
-                .Include(x => x.Chats)
-                    .ThenInclude(x => x.Messages)
-                .FirstOrDefault(x => x.ID == user.AccountID);
+            user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+            if (user != null)
+            {
+                account = _context.Set<Account>()
+                   .Include(x => x.Chats)
+                       .ThenInclude(x => x.AD)
+                           .ThenInclude(x => x.ADImages)
+                   .Include(x => x.Chats)
+                       .ThenInclude(x => x.Messages)
+                   .FirstOrDefault(x => x.ID == user.AccountID);
+            }
             if (user == null || account == null) return null;
             #endregion
 
@@ -179,14 +189,19 @@ namespace Omni.Controllers.API
         public async Task<IActionResult> GetAccountInfo()
         {
             #region Check user
+            Account account = null;
+            ApplicationUser user = null;
             var userID = HttpContext.User.Identity.Name;
             if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-            ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
-            Account account = _context.Set<Account>()
-                .Include(x => x.ADs)
-                    .ThenInclude(x => x.ADImages)
-                .FirstOrDefault(x => x.ID == user.AccountID);
-            if (user == null || account == null) return null;
+            user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+            if (user != null)
+            {
+                account = _context.Set<Account>()
+                    .Include(x => x.ADs)
+                        .ThenInclude(x => x.ADImages)
+                    .FirstOrDefault(x => x.ID == user.AccountID);
+                if (user == null || account == null) return null;
+            }
             #endregion
 
             var image = account.ImagePath;
