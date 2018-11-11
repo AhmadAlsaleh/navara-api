@@ -25,6 +25,8 @@ namespace NavaraAPI.ViewModels
         public Guid? OfferID { set; get; }
         public string OfferTitle { set; get; }
         public string OfferThumbnail { set; get; }
+        public double? CashBack { get; set; }
+        public Guid? AccountID { get; set; }
     }
 
     public class CartOfferViewModel

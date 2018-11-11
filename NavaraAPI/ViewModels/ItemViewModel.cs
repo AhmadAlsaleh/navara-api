@@ -17,6 +17,7 @@ namespace NavaraAPI.ViewModels
         public bool? IsEnable { set; get; }
         public string ThumbnailImagePath { set; get; }
         public Guid? ItemCategoryID { get; set; }
+        public int? DaysToBeAvilable { set; get; }
     }
     public class ItemFullModel
     {
@@ -37,6 +38,7 @@ namespace NavaraAPI.ViewModels
         public string Owner { get; set; }
         public string Mobile { get; set; }
         public string Location { get; set; }
+        public int? DaysToBeAvilable { set; get; }
     }
     public class ItemBasicModel
     {
@@ -50,6 +52,8 @@ namespace NavaraAPI.ViewModels
         public bool? IsEnable { get; set; }
         public string ShortDescription { get; set; }
         public string ThumbnailImagePath { get; set; }
+        public Guid? AccountID { get; set; }
+        public int? DaysToBeAvilable { set; get; }
     }
 
     public class ItemNewModel

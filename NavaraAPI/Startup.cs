@@ -22,6 +22,9 @@ using SmartLifeLtd.Data.Tables.Navara;
 using SmartLifeLtd.Services;
 using SmartLifeLtd.IServices;
 using NavaraAPI.Controllers;
+using DinkToPdf;
+using DinkToPdf.Contracts;
+using NavaraAPI.Classes;
 
 namespace NavaraAPI
 {
@@ -122,6 +125,12 @@ namespace NavaraAPI
             services.AddMvc();
             services.AddSignalR();
 
+            #region PDF Generator
+            var context = new CustomAssemblyLoadContext();
+            context.LoadUnmanagedLibrary(Path.Combine(Directory.GetCurrentDirectory(), "libwkhtmltox.dll"));
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+            #endregion
+
             #region Configure Email
             EmailService.AppName = "Navara Store";
             EmailService.SenderName = "Navara Store Team";
@@ -129,6 +138,8 @@ namespace NavaraAPI
             EmailService.ResetURL = "http://navarastore.com/Users/ResetPassword?token={0}&userid={1}";
             EmailService.SenderEmail = "noreply@navarastore.com";
             EmailService.Password = "P@ssw0rd";
+            EmailService.SupportEmail = "support@navarastore.com";
+            EmailService.SupportPassword = "P@ssw0rd";
             EmailService.ServerMailHost = "mi3-wts6.a2hosting.com";
             EmailService.ServerPort = 25;
             EmailService.SSLNeed = false;

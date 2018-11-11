@@ -8,6 +8,9 @@ using NavaraAPI.ViewModels;
 using SmartLifeLtd.API;
 using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Navara;
+using SmartLifeLtd.Data.Tables.Shared;
+using SmartLifeLtd.Enums;
+using SmartLifeLtd.Management.Interfaces;
 
 namespace NavaraAPI.Controllers
 {
@@ -62,6 +65,26 @@ namespace NavaraAPI.Controllers
                         ItemCategory = y.Item?.ItemCategory?.Name
                     }).ToList()
                 });
+                #region Add Click History
+                var clickContext = _context as IClickHistoryContext;
+                if (clickContext != null)
+                {
+                    var clickObject = clickContext.ObjectClicks.FirstOrDefault(x => x.ObjectType == nameof(offer) && x.ObjectID == id);
+                    if (clickObject == null)
+                    {
+                        clickObject = new SmartLifeLtd.Data.Tables.Shared.ObjectClick()
+                        {
+                            ObjectType = nameof(Offer),
+                            ObjectID = id,
+                            ClicksCount = 0
+                        };
+                        clickContext.ObjectClicks.Add(clickObject);
+                    }
+                    clickObject.ClicksCount++;
+                    clickObject.LastClickedDate = DateTime.UtcNow;
+                    _context.SaveChanges();
+                }
+                #endregion
                 return json;
             }
             catch (Exception ex)
@@ -88,6 +111,27 @@ namespace NavaraAPI.Controllers
                     UnitNetPrice = x.Price ?? ((x.Item?.Price ?? 0) - ((x.Item?.Price ?? 0) * (x.Discount ?? 0) / 100.0)),
                     UnitPrice = x.Item?.Price
                 }));
+                #region Add Open View History
+                var clickContext = _context as IClickHistoryContext;
+                if (clickContext != null)
+                {
+                    var clickView = clickContext.OpenViewHistories.FirstOrDefault(x =>
+                        x.View == NavaraView.Offer.ToString() &&
+                        x.Date.GetValueOrDefault().Date == DateTime.Now.Date);
+                    if (clickView == null)
+                    {
+                        clickView = new OpenViewHistory()
+                        {
+                            ClickTime = 0,
+                            View = NavaraView.Offer.ToString(),
+                            Date = DateTime.Now.Date
+                        };
+                        clickContext.OpenViewHistories.Add(clickView);
+                    }
+                    clickView.ClickTime++;
+                    clickContext.SubmitAsync();
+                }
+                #endregion
                 return json;
             }
             catch (Exception ex)

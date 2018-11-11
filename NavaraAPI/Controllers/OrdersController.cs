@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DinkToPdf.Contracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NavaraAPI.Classes;
 using NavaraAPI.ViewModels;
 using SmartLifeLtd.API;
 using SmartLifeLtd.Classes.Attribute;
@@ -12,15 +16,18 @@ using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Navara;
 using SmartLifeLtd.Enums;
+using SmartLifeLtd.Services;
 
 namespace NavaraAPI.Controllers
 {
     [Route("[controller]/[action]")]
     public class OrdersController : BaseController<Order>
     {
-        public OrdersController(NavaraDbContext context)
+        readonly IConverter _converter;
+        public OrdersController(NavaraDbContext context, IConverter converter)
             : base(context)
         {
+            _converter = converter;
         }
 
         [AuthorizeToken]
@@ -45,12 +52,14 @@ namespace NavaraAPI.Controllers
                     FromTime = DateTime.Parse(model.FromTime),
                     ToTime = DateTime.Parse(model.ToTime),
                     Location = model.Location,
+
                     LocationRemark = model.LocationRemark,
+                    LocationText = model.LocationText,
                     Mobile = model.Mobile,
                     Remark = model.Remark,
                     Name = model.Name,
                     Status = OrderStatus.InProgress.ToString(),
-                    UseWallet = model.UseWallet
+                    UseWallet = model.UseWallet,
                 };
                 foreach (var record in model.OrderItems)
                 {
@@ -70,12 +79,44 @@ namespace NavaraAPI.Controllers
                 }
                 if (order.GenerateCode(_context as NavaraDbContext) == false)
                     return BadRequest("Error while generating Order Code");
+                if (order.UseWallet == true)
+                {
+                    int amount = ((int)(account.Wallet / 100)) * 100;
+                    amount = Math.Min(amount, (account.Wallet as int?) ?? 0);
+                    account.Wallet -= amount;
+                    order.WalletAmount = amount;
+                }
+
                 this._context.Set<Order>().Add(order);
                 await this._context.SaveChangesAsync();
-                await order.FixMissingOfferItems(_context);
-                await order.UpdateOrder(_context);
-                if (order.UseWallet == true) { }
-                return Json(new { OrderCode = order.Code });
+                Thread UpdateAllInfo = new Thread(async () =>
+                {
+                    using (var context = new NavaraDbContext())
+                    {
+                        var orginalOrder = await context.Orders.Include("OrderItems").Include("Account")
+                        .Include("OrderItems.Item").Include("OrderItems.Offer").FirstOrDefaultAsync(x => x.ID == order.ID);
+                        await orginalOrder.FixMissingOfferItems(context);
+                        await orginalOrder.UpdateOrder(context);
+                        string pdfPath = await orginalOrder.CreatePDF(_converter, context as NavaraDbContext);
+                        #region Send Email to Support
+                        await EmailService.SendEmailToSupport($"New Order",
+                            $"Order # {orginalOrder.Code}\r\n" +
+                            $"Account: {orginalOrder.Account.Name}\r\n" +
+                            $"Amount: {orginalOrder.OrderItems.Sum(x => x.Total)}\r\n" +
+                            $"Date: {orginalOrder.CreationDate}\r\n" +
+                            $"Days To Deliver: {orginalOrder.DaysToDeliver}\r\n" +
+                            $"Items:\r\n{string.Join("\t | \t", orginalOrder.OrderItems.Select(x => x.Item?.Name + " : " + x.Quantity))}", Path.Combine("wwwroot", pdfPath));
+
+                        if (!string.IsNullOrWhiteSpace(order.Account.Mobile))
+                        {
+                            string message = $"Thank you for choosing Navara Store\r\nYour Order had been recieved\r\nOrder Code: {order.Code}\r\nOrder invoice: {Path.Combine("http://api.navarastore.com/", pdfPath.Replace("\\", "/"))}";
+                            SMSService.SendWhatsApp(message, order.Account.Mobile);
+                        }
+                        #endregion
+                    }
+                });
+                UpdateAllInfo.Start();
+                return Json(new { OrderCode = order.Code, DaysToDeliver = order.DaysToDeliver });
             }
             catch (Exception ex)
             {
@@ -124,6 +165,9 @@ namespace NavaraAPI.Controllers
                     NetTotalPrices = order.OrderItems.Sum(y => y.Total ?? 0),
                     Status = order.Status,
                     UseWallet = order.UseWallet,
+                    WalletAmount = order.WalletAmount,
+                    DaysToDeliver = order.DaysToDeliver,
+                    InvoicePath = order.InvoicePath,
 
                     OrderItems = order.OrderItems.Select(y => new OrderItemModel
                     {
@@ -139,7 +183,42 @@ namespace NavaraAPI.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("{id}")]
+        [AuthorizeToken]
+        public async Task<IActionResult> Cancel(Guid id)
+        {
+            try
+            {
+                var userID = HttpContext.User.Identity.Name;
+                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
+                //if (!user.IsVerified) return StatusCode(StatusCodes.Status426UpgradeRequired);
+                ApplicationUser user = await _context.Set<ApplicationUser>().SingleOrDefaultAsync(item => item.UserName == userID);
+                if (user == null) return BadRequest("Token is not related to any Account");
+
+                var order = await _context.Set<Order>().Include("Account").Include("OrderItems").SingleOrDefaultAsync(x => x.ID == id);
+                if (order == null) return NotFound("id is not realted to any order");
+                if (order.AccountID != user.AccountID) return BadRequest("This Order is not related to the authorized user");
+                order.Status = OrderStatus.Canceled.ToString();
+                order.UpdatedDate = DateTime.Now;
+                order.Account.Wallet += order.WalletAmount;
+                _context.SubmitAsync();
+                #region Send Email to Support
+                EmailService.SendEmailToSupport($"Order # {order.Code} has been canceled",
+                    $"Order # {order.Code} has been canceled\r\n" +
+                    $"Account: {order.Account.Name}" +
+                    $"Amount: {order.OrderItems.Sum(x => x.Total)}" +
+                    $"Date: {order.CreationDate}" +
+                    $"Days To Deliver: {order.DaysToDeliver}");
+                #endregion
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

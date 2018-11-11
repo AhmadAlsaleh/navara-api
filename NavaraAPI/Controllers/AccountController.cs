@@ -21,6 +21,7 @@ using SmartLifeLtd.Management.Interfaces;
 using SmartLifeLtd.ViewModels;
 using SmartLifeLtd.Controllers;
 using SmartLifeLtd.IServices;
+using SmartLifeLtd.Data.Tables.Shared;
 
 namespace NavaraAPI.Controllers
 {
@@ -52,6 +53,28 @@ namespace NavaraAPI.Controllers
                 if (user == null) return BadRequest("Error in get user or account data");
                 Account account = _Context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
                 if (account == null) return BadRequest("Error in get user or account data");
+
+                #region Add Open View History
+                var clickContext = _Context as IClickHistoryContext;
+                if (clickContext != null)
+                {
+                    var clickView = clickContext.OpenViewHistories.FirstOrDefault(x =>
+                        x.View == NavaraView.Profile.ToString() &&
+                        x.Date.GetValueOrDefault().Date == DateTime.Now.Date);
+                    if (clickView == null)
+                    {
+                        clickView = new OpenViewHistory()
+                        {
+                            ClickTime = 0,
+                            View = NavaraView.Profile.ToString(),
+                            Date = DateTime.Now.Date
+                        };
+                        clickContext.OpenViewHistories.Add(clickView);
+                    }
+                    clickView.ClickTime++;
+                    clickContext.SubmitAsync();
+                }
+                #endregion
 
                 return Json(new
                 {
@@ -159,7 +182,10 @@ namespace NavaraAPI.Controllers
                         OfferThumbnail = x.Offer?.ThumbnailImagePath,
                         Total = x.Total,
                         UnitNetPrice = x.UnitNetPrice,
-                        UnitPrice = x.UnitPrice
+                        UnitPrice = x.UnitPrice,
+                        CashBack = x.Item?.CashBack,
+                        AccountID = x.Item?.AccountID
+                        
                     })?.ToList()
                 });
                 return json;

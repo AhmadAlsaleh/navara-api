@@ -10,6 +10,7 @@ namespace NavaraAPI.ViewModels
         public Guid ID { set; get; }
         public List<OrderItemModel> OrderItems { get; set; }
         public string Location   { set; get; }
+        public string LocationText { set; get; }
         public string LocationRemark { set; get; }
         public string FromTime { set; get; }
         public string ToTime { set; get; }
@@ -23,6 +24,9 @@ namespace NavaraAPI.ViewModels
         public double? TotalDiscount { set; get; }
         public double? NetTotalPrices { set; get; }
         public bool? UseWallet { set; get; }
+        public double? WalletAmount { set; get; }
+        public int? DaysToDeliver { set; get; }
+        public string InvoicePath { set; get; }
     }
 
     public class OrderBasicModel

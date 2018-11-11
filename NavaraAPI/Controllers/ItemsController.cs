@@ -13,6 +13,9 @@ using SmartLifeLtd.Classes.Attribute;
 using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Navara;
+using SmartLifeLtd.Data.Tables.Shared;
+using SmartLifeLtd.Enums;
+using SmartLifeLtd.Management.Interfaces;
 
 namespace NavaraAPI.Controllers
 {
@@ -48,12 +51,33 @@ namespace NavaraAPI.Controllers
                     IsEnable = item.IsEnable,
                     ItemCategory = item.ItemCategory?.Name,
                     ItemImages = item.ItemImages.Select(y => y.ImagePath).ToList(),
-                    
+                    DaysToBeAvilable = item.DaysToBeAvailable,
+
                     AccountID = item.AccountID,
                     Location = item.Location,
                     Mobile = item.Mobile,
                     Owner = item.Owner
                 });
+                #region Add Click History
+                var clickContext = _context as IClickHistoryContext;
+                if (clickContext != null)
+                {
+                    var clickObject = clickContext.ObjectClicks.FirstOrDefault(x => x.ObjectType == nameof(Item) && x.ObjectID == id);
+                    if (clickObject == null)
+                    {
+                        clickObject = new SmartLifeLtd.Data.Tables.Shared.ObjectClick()
+                        {
+                            ObjectType = nameof(Item),
+                            ObjectID = id,
+                            ClicksCount = 0
+                        };
+                        clickContext.ObjectClicks.Add(clickObject);
+                    }
+                    clickObject.ClicksCount++;
+                    clickObject.LastClickedDate = DateTime.UtcNow;
+                    _context.SaveChanges();
+                }
+                #endregion
                 return json;
             }
             catch (Exception ex)
@@ -79,7 +103,10 @@ namespace NavaraAPI.Controllers
                     CashBack = x.CashBack,
                     Quantity = x.Quantity,
                     ItemCategoryID = x.ItemCategoryID,
-                    ThumbnailImagePath = x.ThumbnailImagePath
+                    ThumbnailImagePath = x.ThumbnailImagePath,
+                    AccountID = x.AccountID,
+                    IsEnable = x.IsEnable,
+                    DaysToBeAvilable = x.DaysToBeAvailable
                 }));
                 return json;
             }
@@ -106,8 +133,37 @@ namespace NavaraAPI.Controllers
                     CashBack = x.CashBack,
                     Quantity = x.Quantity,
                     ItemCategoryID = x.ItemCategoryID,
-                    ThumbnailImagePath = x.ThumbnailImagePath
+                    ThumbnailImagePath = x.ThumbnailImagePath,
+                    AccountID = x.AccountID,
+                    IsEnable = x.IsEnable,
+                    DaysToBeAvilable = x.DaysToBeAvailable
                 }));
+
+                #region Add Open View History
+                var clickContext = _context as IClickHistoryContext;
+                if (clickContext != null)
+                {
+                    var cat = _context.Set<ItemCategory>().FirstOrDefault(x => x.ID == id)?.Name;
+                    var clickView = clickContext.OpenViewHistories.FirstOrDefault(x =>
+                        x.View == NavaraView.Item.ToString() &&
+                        x.Date.GetValueOrDefault().Date == DateTime.Now.Date &&
+                        x.Remark == cat);
+                    if (clickView == null)
+                    {
+                        clickView = new OpenViewHistory()
+                        {
+                            ClickTime = 0,
+                            View = NavaraView.Item.ToString(),
+                            Date = DateTime.Now.Date,
+                            Remark = cat
+                        };
+                        clickContext.OpenViewHistories.Add(clickView);
+                    }
+                    clickView.ClickTime++;
+                    clickContext.SubmitAsync();
+                }
+                #endregion
+
                 return json;
             }
             catch (Exception ex)
@@ -153,7 +209,13 @@ namespace NavaraAPI.Controllers
                 };
                 #region Save Main Image
                 if (model.Thumbnail != null && model.Thumbnail.Length > 0)
+                {
                     item.ThumbnailImagePath = ImageOperations.SaveItemImage(model.Thumbnail, item);
+                    var itemImage = new ItemImage() { Item = item };
+                    itemImage.ImagePath = ImageOperations.SaveItemImage(model.Thumbnail, itemImage);
+                    if (!string.IsNullOrWhiteSpace(itemImage.ImagePath)) { item.ItemImages.Add(itemImage); }
+                    else itemImage.Item = null;
+                }
                 #endregion
 
                 #region Save Other images
@@ -170,6 +232,7 @@ namespace NavaraAPI.Controllers
                         {
                             item.ItemImages.Add(itemImage);
                         }
+                        else itemImage.Item = null;
                     }
                 }
                 #endregion
