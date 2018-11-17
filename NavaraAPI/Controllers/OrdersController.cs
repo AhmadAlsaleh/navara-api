@@ -15,7 +15,9 @@ using SmartLifeLtd.Classes.Attribute;
 using SmartLifeLtd.Data.AspUsers;
 using SmartLifeLtd.Data.DataContexts;
 using SmartLifeLtd.Data.Tables.Navara;
+using SmartLifeLtd.Data.Tables.Shared;
 using SmartLifeLtd.Enums;
+using SmartLifeLtd.Management.Interfaces;
 using SmartLifeLtd.Services;
 
 namespace NavaraAPI.Controllers
@@ -93,7 +95,7 @@ namespace NavaraAPI.Controllers
                 {
                     using (var context = new NavaraDbContext())
                     {
-                        var orginalOrder = await context.Orders.Include("OrderItems").Include("Account")
+                        var orginalOrder = await context.Orders.Include("OrderItems").Include("Account").Include("Account.User")
                         .Include("OrderItems.Item").Include("OrderItems.Offer").FirstOrDefaultAsync(x => x.ID == order.ID);
                         await orginalOrder.FixMissingOfferItems(context);
                         await orginalOrder.UpdateOrder(context);
@@ -106,11 +108,11 @@ namespace NavaraAPI.Controllers
                             $"Date: {orginalOrder.CreationDate}\r\n" +
                             $"Days To Deliver: {orginalOrder.DaysToDeliver}\r\n" +
                             $"Items:\r\n{string.Join("\t | \t", orginalOrder.OrderItems.Select(x => x.Item?.Name + " : " + x.Quantity))}", Path.Combine("wwwroot", pdfPath));
-
-                        if (!string.IsNullOrWhiteSpace(order.Account.Mobile))
+                        string Mobile = "+" + order.Account.User.CountryCode +  order.Account.User.PhoneNumber;
+                        if (!string.IsNullOrWhiteSpace(Mobile))
                         {
                             string message = $"Thank you for choosing Navara Store\r\nYour Order had been recieved\r\nOrder Code: {order.Code}\r\nOrder invoice: {Path.Combine("http://api.navarastore.com/", pdfPath.Replace("\\", "/"))}";
-                            SMSService.SendWhatsApp(message, order.Account.Mobile);
+                            SMSService.SendWhatsApp(message, Mobile);
                         }
                         #endregion
                     }
@@ -179,6 +181,24 @@ namespace NavaraAPI.Controllers
                         Total = y.Total
                     }).ToList()
                 });
+                #region add test Notification
+                INotificationContext AppContext = _context as INotificationContext;
+                if (AppContext != null)
+                {
+                    Notification notification = new Notification()
+                    {
+                        Body = "There are also many informal uses of this kind of letter, though they may not necessarily be officially titled as a “notification”.",
+                        ObjectID = (_context as NavaraDbContext)?.Items.FirstOrDefault().ID,
+                        Subject = "New Item arived",
+                        RelatedToEnum = NavaraNotificationRelatedTo.Item,
+                        NotificationTypeEnum = NavaraNotificationType.NewItem
+                    };
+                    notification.AddStatus(AppContext, NotifyStatus.Sent, user.Id);
+                    AppContext.Notifications.Add(notification);
+                    AppContext.SaveChanges();
+                }
+                #endregion
+
                 return json;
             }
             catch (Exception ex)

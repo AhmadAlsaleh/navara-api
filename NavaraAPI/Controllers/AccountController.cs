@@ -37,67 +37,6 @@ namespace NavaraAPI.Controllers
             _Context = context;
         }
 
-
-        /// <summary>
-        /// Gets the user informations that is saved in the database
-        /// </summary>
-        /// <returns></returns>
-        [AuthorizeToken]
-        public async Task<IActionResult> GetInformation()
-        {
-            try
-            {
-                var userID = HttpContext.User.Identity.Name;
-                if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-                ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
-                if (user == null) return BadRequest("Error in get user or account data");
-                Account account = _Context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
-                if (account == null) return BadRequest("Error in get user or account data");
-
-                #region Add Open View History
-                var clickContext = _Context as IClickHistoryContext;
-                if (clickContext != null)
-                {
-                    var clickView = clickContext.OpenViewHistories.FirstOrDefault(x =>
-                        x.View == NavaraView.Profile.ToString() &&
-                        x.Date.GetValueOrDefault().Date == DateTime.Now.Date);
-                    if (clickView == null)
-                    {
-                        clickView = new OpenViewHistory()
-                        {
-                            ClickTime = 0,
-                            View = NavaraView.Profile.ToString(),
-                            Date = DateTime.Now.Date
-                        };
-                        clickContext.OpenViewHistories.Add(clickView);
-                    }
-                    clickView.ClickTime++;
-                    clickContext.SubmitAsync();
-                }
-                #endregion
-
-                return Json(new
-                {
-                    account.Name,
-                    account.Mobile,
-                    account.CartID,
-                    account.Wallet,
-                    account.LanguageID,
-                    account.UniqueCode,
-                    user.Email,
-                    user.UserName,
-                    user.CountryCode,
-                    user.PhoneNumber,
-                    user.IsVerified,
-                    IsExternalLogin = user.IsExternalLogin ?? false
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex);
-            }
-        }
-
         [AuthorizeToken]
         public async Task<IActionResult> GetOrders()
         {
@@ -185,7 +124,7 @@ namespace NavaraAPI.Controllers
                         UnitPrice = x.UnitPrice,
                         CashBack = x.Item?.CashBack,
                         AccountID = x.Item?.AccountID
-                        
+
                     })?.ToList()
                 });
                 return json;
@@ -260,54 +199,6 @@ namespace NavaraAPI.Controllers
             }
         }
 
-        /// <summary>
-        /// Updates all the user information in the database
-        /// </summary>
-        /// <param name="userInfo">The object that holds the new information</param>
-        /// <returns></returns>
-        [AuthorizeToken]
-        [HttpPost]
-        public async Task<IActionResult> UpdateInformation([FromBody]UpdateUserInformationDataModel userInfo)
-        {
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var userID = HttpContext.User.Identity.Name;
-                    if (userID == null) return StatusCode(StatusCodes.Status401Unauthorized);
-                    ApplicationUser user = await _Context.Users.SingleOrDefaultAsync(item => item.UserName == userID);
-                    Account account = _Context.Set<Account>().FirstOrDefault(x => x.ID == user.AccountID);
-                    if (user == null || account == null) return null;
-                    account.Name = userInfo.FirstName;
-                    #region add test Notification
-                    INotificationContext AppContext = _Context as INotificationContext;
-                    if (AppContext != null)
-                    {
-                        Notification notification = new Notification()
-                        {
-                            Body = "There are also many informal uses of this kind of letter, though they may not necessarily be officially titled as a “notification”.",
-                            ObjectID = _Context.Items.FirstOrDefault().ID,
-                            Subject = "New Item arived",
-                            RelatedToEnum = NavaraNotificationRelatedTo.Item,
-                            NotificationTypeEnum = NavaraNotificationType.NewItem
-                        };
-                        notification.AddStatus(AppContext, NotifyStatus.Sent, user.Id);
-                        AppContext.Notifications.Add(notification);
-                        AppContext.SaveChanges();
-                    }
-                    #endregion
-                    var result = await mService.UpdateUserInformation(userID, userInfo) as bool?;
-                    if (result == true) return Ok();
-                    else return BadRequest("Error while Update information");
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
-            }
-            return BadRequest("Invaild information please check the sent information and try again");
-        }
-
         [HttpGet]
         [AuthorizeToken]
         public async Task<IActionResult> GetWallet()
@@ -326,5 +217,8 @@ namespace NavaraAPI.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet, AuthorizeToken] public async Task<IActionResult> GetInformation() { return RedirectToAction("GetInformation", "Users"); }
+        [HttpGet, AuthorizeToken] public async Task<IActionResult> UpdateInformation([FromBody]UpdateUserInformationDataModel userInfo) { return RedirectToAction("UpdateInformation", "Users", userInfo); }
     }
 }
