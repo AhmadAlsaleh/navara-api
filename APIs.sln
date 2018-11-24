@@ -5,13 +5,13 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NavaraAPI", "NavaraAPI\NavaraAPI.csproj", "{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartlifeLtd", "..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj", "{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NavaraStore", "..\NavaraWebsite\NavaraStore\NavaraStore.csproj", "{5FCDB603-40AF-4DCC-9039-46964D5BC615}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "iShipAPI", "..\..\iShip\iShipAPI\iShipAPI\iShipAPI.csproj", "{B984F835-2682-48DA-8425-5F7258909EA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompuLeaderLibraryCS", "..\..\..\..\Compuleader\Projects\CompuLeader-Library\CompuLeaderLibraryCS\CompuLeaderLibraryCS.csproj", "{2F01182C-9687-4531-8D4E-7C2A64F36805}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompuLeaderLibraryCS", "..\..\..\Compuleader\Projects\CompuLeader-Library\CompuLeaderLibraryCS\CompuLeaderLibraryCS.csproj", "{2F01182C-9687-4531-8D4E-7C2A64F36805}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SmartlifeLtd", "..\smartlifeltdweb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj", "{4E58B068-9D0C-43C6-ABA4-47BC96D2E788}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,6 @@ Global
 		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD4E30DE-0DEC-4A57-BDB4-B9622EAF8F6A}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC5863F5-6FEA-49AA-8D68-C9FE844C4CB4}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{5FCDB603-40AF-4DCC-9039-46964D5BC615}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5FCDB603-40AF-4DCC-9039-46964D5BC615}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FCDB603-40AF-4DCC-9039-46964D5BC615}.Release|Any CPU.ActiveCfg = Debug|Any CPU
@@ -39,6 +35,10 @@ Global
 		{2F01182C-9687-4531-8D4E-7C2A64F36805}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F01182C-9687-4531-8D4E-7C2A64F36805}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F01182C-9687-4531-8D4E-7C2A64F36805}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E58B068-9D0C-43C6-ABA4-47BC96D2E788}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E58B068-9D0C-43C6-ABA4-47BC96D2E788}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E58B068-9D0C-43C6-ABA4-47BC96D2E788}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E58B068-9D0C-43C6-ABA4-47BC96D2E788}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

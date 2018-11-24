@@ -9,6 +9,7 @@ namespace NavaraAPI.ViewModels
     {
         public Guid ID { set; get; }
         public string Name { get; set; }
+        public string Name2 { get; set; }
         public string Description  { get; set; }
         public string ImagePath { get; set; }
     }

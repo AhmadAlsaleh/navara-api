@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\SmartlifeLtdWeb\SmartLifeLtdWeb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj" />
+    <ProjectReference Include="..\..\smartlifeltdweb\SmartlifeSolutionsWeb\SmartlifeLtd.csproj" />
   </ItemGroup>
 
   <ItemGroup>

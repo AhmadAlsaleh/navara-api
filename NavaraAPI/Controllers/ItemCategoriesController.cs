@@ -32,6 +32,7 @@ namespace NavaraAPI.Controllers
                 {
                     ID = x.ID,
                     Name = x.Name,
+                    Name2=x.Name2,
                     Description = x.Description,
                     ImagePath = x.ImagePath
                 }));

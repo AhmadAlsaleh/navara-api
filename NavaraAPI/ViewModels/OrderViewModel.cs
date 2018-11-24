@@ -27,6 +27,7 @@ namespace NavaraAPI.ViewModels
         public double? WalletAmount { set; get; }
         public int? DaysToDeliver { set; get; }
         public string InvoicePath { set; get; }
+        public string PromoCode { get; set; }
     }
 
     public class OrderBasicModel

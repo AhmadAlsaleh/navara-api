@@ -54,7 +54,7 @@ namespace NavaraAPI.Controllers
                     FromTime = DateTime.Parse(model.FromTime),
                     ToTime = DateTime.Parse(model.ToTime),
                     Location = model.Location,
-
+                    PromoCode=model.PromoCode,
                     LocationRemark = model.LocationRemark,
                     LocationText = model.LocationText,
                     Mobile = model.Mobile,
@@ -63,6 +63,14 @@ namespace NavaraAPI.Controllers
                     Status = OrderStatus.InProgress.ToString(),
                     UseWallet = model.UseWallet,
                 };
+                if (!string.IsNullOrEmpty(model.PromoCode))
+                {
+                    var Cash = _context.Set<CashOffer>().FirstOrDefault(s => s.PromoCode == model.PromoCode);
+                    if (Cash != null)
+                    {
+                        order.Discount = Cash.Percentge;
+                    }
+                }
                 foreach (var record in model.OrderItems)
                 {
                     if (record == null) continue;
@@ -150,7 +158,8 @@ namespace NavaraAPI.Controllers
                     order.GenerateCode(_context as NavaraDbContext);
                     await _context.SaveChangesAsync();
                 }
-                var json = new JsonResult(new OrderModel()
+
+                var data = new OrderModel()
                 {
                     ID = order.ID,
                     Name = order.Name,
@@ -180,7 +189,11 @@ namespace NavaraAPI.Controllers
                         ThumbnailImagePath = y.Item?.ThumbnailImagePath,
                         Total = y.Total
                     }).ToList()
-                });
+                };
+                var promoCodDisc = ((order.Discount.GetValueOrDefault() / 100.0) * order.OrderItems.Sum(y => y.Total ?? 0));
+                data.TotalDiscount += promoCodDisc;
+                data.NetTotalPrices -= promoCodDisc;
+                var json = new JsonResult(data);
                 #region add test Notification
                 INotificationContext AppContext = _context as INotificationContext;
                 if (AppContext != null)

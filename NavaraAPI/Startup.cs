@@ -40,7 +40,7 @@ namespace NavaraAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            IConfigurationSection DBConf = Configuration.GetSection("DBOnline");
+            IConfigurationSection DBConf = Configuration.GetSection("DBOnline2");
             IConfigurationSection DBLogConf = Configuration.GetSection("DBLogOnline");
             ConnectionSetting connectionString = new ConnectionSetting(
                 DBConf.GetValue<string>("ServerName"),
