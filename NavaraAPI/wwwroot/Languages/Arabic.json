@@ -1,1 +1,376 @@
-{"loading":"يتم العمل","currencyCode":"ل.س","noInternet":"No Internet Connection, Please Try Again","yes":"Yes","no":"No","noConnection":"No Internet Connection","offline":"You're Offline","mainActivity":{"profile":"Profile","account":"Account","myCart":"My Cart","myOrder":"My Order","appSection":"App Section","ourItems":"Our Items","latestOffers":"Latest Offers","locationAndContact":"Location And Contact","others":"Others","changeLanguage":"Change Language","termsOfUse":"Terms Of Use","aboutUs":"About Us"},"loginRegisterActivity":{"canceled":"CANCELED","login":"Login","register":"Register","emailOrMobile":"Email or Mobile:","email":"Email","mobile":"Mobile","yourPassword":"Your Password:","loginWithFacebook":"Login With Facebook","forgetPassword":"Forget Password","doNotHaveAccount":"You don't have an account","emailExample":"user@example.com","mobileExample":"9XXX-XXX-XXX","yourName":"Your Name:","havePromoCode":"I have a Promo Code","promoCode":"Promo Code","passwordVal":"password have to be 6 characters at least","checkEmail":"Check your email please","checkMobile":"Check your mobile number please","checkName":"Enter your name","registerError":"This User already taken\nChoose another one please","try":"Please Try Again","welcome":"Welcome","loginError":"This account is not registered","passwordInc":"Incorrect Password","noNet":"No Internet Connection, Please Try Again"},"locationActivity":{"title":"Location and Contact","address":"Address","addressLine":"Syria, Lattakia, 8th March street","workingHours":"Working Hours","workingHoursLine":"From 09:00 AM to 05:00 PM","makeCall":"Make\nCall","visitWebsite":"Visit Website","contactUs":"Contact Us"},"itemsActivity":{"categoriesTitle":"Our Categories","search":"Search","searchHint":"Searching"},"itemPreviewActivity":{"existInOurStock":"Exist in Our Stock","outOfStock":"Out of Stock","starNote":"* Note: ","price":"Price:","contactInformation":"Contact Information","description":"Description:","contactUs":"Contact Us","name":"Name:","mobile":"Mobile:","soon":"Soon to be Available","day":"Day to be Available","days":"Days to be Available"},"offersActivity":{"title":"Latest Offers","offerRemoved":"Offer has removed Successfully"},"offerDisPreviewActivity":{"price":"Price:","description":"Description:","contactUs":"Contact Us"},"offerFreePreviewActivity":{"details":"Details:","andGet":"And Get:","description":"Description:","contactUs":"Contact Us","total":"Total:"},"profileCartOrdersActivity":{"profile":"Profile","myCart":"My Cart","myOrders":"My Orders","name":"Name:","email":"Email:","mobile":"Mobile:","save":"Save","yourWallet":"Your Wallet: ","yourCode":"Your Code: ","copy":"Copy","logout":"Logout","myUsedItems":"My Used Items","cartEmpty":"Your Cart is Empty","noOrders":"No Orders yet","verifyYourAccount":"Verify Your Account","changeMyPassword":"Change My Password","copied":"Your Code Copied Successfully!","updated":"Your Information has Updated Successfully"},"myUsedItemsActivity":{"title":"My Used Items","noItems":"You don't have Used Items yet","addUsedItem":"Add Used Item"},"addUsedItemActivity":{"title":"Add Used Item","titleText":"Title:","price":"Price","quantity":"Quantity:","description":"Description:","contactInformation":"Contact Information","owner":"Owner Name","phone":"Owner Phone","mainImage":"Main Image:","addImages":"Add More Images","add":"Add","cancel":"Cancel","sure":"Sure to cancel?","granted":"Camera Permission Granted","denied":"Camera Permission Denied","wrong":"Something went wrong, Please Try Again","titleVal":"Enter Your Item Title Please","titleLength":"Item Title has to be 3 Characters at least","priceVal":"Enter Your Item Price Please","quantityVal":"Enter Your Item Quantity Please","descriptionVal":"Enter Your Item Description Please","descriptionLength":"Item Description has to be 3 Characters at least","imageVal":"Select Your Item Main Image Please","nameVal":"Enter Your Name Please","phoneVal":"Enter Your Mobile Number Please","added":"Your Item has been added Successfully!","try":"Please Try Again"},"makeOrderActivity":{"title":"Make an Order","next":"Next","previous":"Previous","lessPrice":"Your Amount Order have to be 1,000 S.P at least","lessItems":"Select one item at least","locationVal":"Choose a location please","phoneVal":"Invalid phone number","nameVal":"Enter your name please","cartFragment":{"title":"Select Items and Offers","emptyCart":"Your Cart is Empty\nadd items to make an order"},"locationFragment":{"hintSearch":"Enter Address, City or Zip Code","hint":"* Click on Marker Title to Add more Details\n* Click on Map to Change the Delivery Location"},"timeFragment":{"title":"Select your preferable time to deliver","from":"From","setFromTitle":"Set From Title","to":"To","setToTime":"Set To Time","setFromTime":"Set From Time"},"informationFragment":{"title":"Contact Information","name":"Name:","phone":"Phone Number","remark":"Remark:"},"summaryFragment":{"chosenItems":"Chosen Items","contactInfo":"Contact Information","name":"Name:","phone":"Phone Number:","remark":"Remark:","time":"Preferable Time","location":"Location","yourWallet":"Use Your Wallet","submit":"Submit Your Order","total":"Total:"}},"OrderPreviewActivity":{"orderInfo":"Order Information","chosenItems":"Chosen Items","location":"Location","preferableTime":"Preferable Time","contactInfo":"Contact Information","name":"Name:","phoneNumber":"Phone Number:","remark":"Remark:","cannotCancel":"Sorry, you can't Cancel this Order","alreadyCanceled":"This Order has already Cancelled","fromWallet":"Use From Wallet:","code":"Code:","tomorrow":"order will be delivered today or tomorrow","day":"day","days":"days","during":"order will be delivered during"},"itemsList":{"free":"Free","price":"Price:","total":"Total:","oneItem":"One item at least","outStock":"Out of Stock","unpublish":"Unpublish","publish":"Publish","changeQuantity":"Quantity has changed Successfully","itemRemoved":"Item has removed Successfully","dayTB":"Day to be Available","daysTB":"Days to be Available"},"dialogs":{"aboutUs":{"title":"About Us","message":"Founded in 2016, we specialize in robotics and embedded systems technology.\nMoreover we offer a wide range of products and services in this sector such as Arduino, Raspberry PI, Sensors, Motors, …","button":"Done"},"changeLanguage":{"title":"Change App Language","english":"English","arabic":"Arabic","button":"Change"},"contactUS":{"title":"Contact Us","name":"Name","email":"Email","message":"Message","button":"Send","enterName":"Enter your name please","enterEmail":"Enter your email please","checkEmail":"Check your email please","enterMessage":"Enter your message please","sent":"Message has been sent successfully","try":"Please Try Again","noNet":"No Internet Connection, Please Try Again"},"chooseQuantity":{"title":"Choose Quantity","button":"Add to Cart"},"changePassword":{"title":"Change Password","old":"Old Password:","new":"New Password:","repeatNew":"Repeat New Password:","button":"Change"},"forgetPassword":{"title":"Forget Password","emailOrMobile":"Email or Mobile:","email":"Email","mobile":"Mobile","emailExample":"user@example.com","mobileExample":"9XXX-XXX-XXX","button":"Reset"},"resetPassword":{"title":"Reset Password","emailOrMobile":"Email or Mobile:","email":"Email","mobile":"Mobile","emailHint":"user@example.com","mobileHint":"9XXX-XXX-XXX","button":"Reset","incorrectEmail":"Incorrect email","incorrectphone":"Incorrect Phone","enterCode":"Enter SMS Code Please","enterPassword":"Enter New Password Please","passwordValidation":"Password have to be 6 Characters at least","changed":"Your Password Changed Successfully","noNet":"No Internet Connection, Please Try Again","enterCodePassword":"Please Enter SMS Code and\nNew Password Below","code":"Code:","newPassword":"New Password:","returnBTN":"Return"},"addImage":{"title":"Add Image","take":"Take a Photo","select":"Select from Gallery"},"locationRemark":{"title":"Location Remark","hint":"flour, near market, …","done":"Done"},"sure":{"yes":"Yes","no":"No","cancelOrder":"Sure to Cancel This Order?","removeFromCart":"Sure to remove from Cart?","unpublish":"Sure to unpublish your Item?","republish":"Sure to republish your Item?"},"allDone":{"returnBTN":"Return","addToCart":"Item has been added to your Cart","goToCart":"Go to Cart","orderSent":"Your Order has\nSent Successfully","code":"Order Code:","done":"Done","email":"We Sent a reset password email to","sms":"We Sent a reset password SMS to","emailConf":"We Sent a confirm email to","smsConf":"We Sent a confirm SMS to"},"quantity":{"addToCart":"Add to Cart","starNote":"* Note: "},"confirm":{"title":"Verify Your Account","confirmBTN":"Verify","returnBTN":"Return","resend":"Resend Confirm Code","email":"Please Check your inbox to Confirm","resendEmail":"Resend Email","resendCode":"Resend Code","code":"Please Enter Confirmation Code Below","enterCode":"Enter SMS Code Please","successfully":"Your Account has Verified Successfully","noInternet":"No Internet Connection, Please Try Again","incorrectCode":"Incorrect Code try to Resend New One"}}}
+{
+  "loading": "الرجاء الإنتظار",
+  "currencyCode": "ل.س",
+  "noInternet": "لا يوجد اتصال بالأنترنيت، الرجاء المحاولة مجدداً",
+  "yes": "نعم",
+  "no": "لا",
+  "noConnection": "لا يوجد اتصال بالأنترنيت",
+  "offline": "لقد فقدت الاتصال",
+  "mainActivity": {
+    "profile": "الحساب الشخصي",
+    "account": "بيانات الحساب",
+    "myCart": "سلة المشتريات",
+    "myOrder": "الطلبات",
+    "appSection": "بيانات التطبيق",
+    "ourItems": "القطع الألكترونية والأصناف",
+    "latestOffers": "عروض التخفيضات والقطع المجانية",
+    "locationAndContact": "التواصل معنا، وموقعنا",
+    "others": "مواضيع أخرى",
+    "changeLanguage": "تغيير لغة التطبيق",
+    "termsOfUse": "قوانين الاستخدام",
+    "aboutUs": "حول المتجر"
+  },
+  "loginRegisterActivity": {
+    "canceled": "إلغاء",
+    "login": "تسجيل الدخول",
+    "register": "تسجيل بحساب جديد",
+    "emailOrMobile": "البريد الإلكتروني أو رقم الموبايل:",
+    "email": "البريد الإلكتروني",
+    "mobile": "رقم الموبايل",
+    "yourPassword": "كلمة المرور:",
+    "loginWithFacebook": "الدخول عن طريق الفيس بوك",
+    "forgetPassword": "نسيت كلمة المرور!",
+    "doNotHaveAccount": "ليس لديك حساب؟",
+    "emailExample": "user@example.com",
+    "mobileExample": "9XXX-XXX-XXX",
+    "yourName": "الاسم:",
+    "havePromoCode": "لدي برومو كود",
+    "promoCode": "X4CP1",
+    "passwordVal": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+    "checkEmail": "الرجاء التأكد من صندوق بريدك الألكتروني",
+    "checkMobile": "الرجاء التأكد من الرسائل الواردة",
+    "checkName": "الرجاء إدخال الاسم قبل التسجيل",
+    "registerError": "هذا الحساب محجوز اختر حساب آخر من فضلك",
+    "try": "الرجاء المحاولة من جديد",
+    "welcome": "مرحبا بك",
+    "loginError": "هذا الحساب غير مستخدم",
+    "passwordInc": "كلمة المرور غير صحيحة",
+    "noNet": "لا يوجد اتصال بالأنترنيت، الرجاء المحاولة مجدداً"
+  },
+  "locationActivity": {
+    "title": "التواصل معنا، ومعلومات موقعنا",
+    "address": "العنوان:",
+    "addressLine": "سوريا، اللاذقية، شارع 8 آذار",
+    "workingHours": "ساعات العمل:",
+    "workingHoursLine": "من 09:00 صباحا ًإلى 05:00 مساءً",
+    "makeCall": "اتصل بنا",
+    "visitWebsite": "موقعنا الإلكتروني",
+    "contactUs": "أرسل رسالة إلينا"
+  },
+  "itemsActivity": {
+    "categoriesTitle": "كل التصنيفات",
+    "search": "بحث",
+    "searchHint": "الكلمات المفتاحية"
+  },
+  "itemPreviewActivity": {
+    "existInOurStock": "موجود ضمن المتجر حالياً",
+    "outOfStock": "غير موجود في المتجر حالياً",
+    "starNote": "* ملاحظة: ",
+    "price": "السعر:",
+    "contactInformation": "معلومات الاتصال",
+    "description": "معلومات القطعة:",
+    "contactUs": "تواصل معنا",
+    "name": "صاحب القطعة::",
+    "mobile": "رقم الموبايل:",
+    "soon": "سيكون موجوداً قريباً",
+    "day": "يوم ليصبح متوافراً",
+    "days": "أيام ليصبح متوافراً"
+  },
+  "offersActivity": {
+    "title": "العروض الموجودة حالياً",
+    "offerRemoved": "تم حذف العرض بنجاح"
+  },
+  "offerDisPreviewActivity": {
+    "price": "السعر:",
+    "description": "معلومات العرض:",
+    "contactUs": "تواصل معنا"
+  },
+  "offerFreePreviewActivity": {
+    "details": "اشتري القطعة:",
+    "andGet": "واحصل على:",
+    "description": "معلومات العرض:",
+    "contactUs": "تواصل معنا",
+    "total": "المجموع:"
+  },
+  "profileCartOrdersActivity": {
+    "profile": "الحساب الشخصي",
+    "myCart": "سلة المشتريات",
+    "myOrders": "الطلبات",
+    "name": "الاسم:",
+    "email": "البريد الألكتروني:",
+    "mobile": "رقم الموبايل:",
+    "save": "حفظ",
+    "yourWallet": "محفظتك: ",
+    "yourCode": "الرمز الخاص بك: ",
+    "copy": "نسخ الرمز",
+    "logout": "تسجيل الخروج",
+    "myUsedItems": "قطعي المعروضة للبيع",
+    "cartEmpty": "سلة المشتريات فارغة\nابدأ الآن بالبحث ضمن التطبيق\nوقم بإضافة القطع إلى سلة المشتريات",
+    "noOrders": "لم تقم بإنشاء أي طلب حتى الآن",
+    "verifyYourAccount": "الرجاء تفعيل حسابك",
+    "changeMyPassword": "تغيير كلمة المرور",
+    "copied": "تم نسخ الرمز الخاص بك بنجاح!",
+    "updated": "تم تحديث معلوماتك بنجاح"
+  },
+  "myUsedItemsActivity": {
+    "title": "قطعي المعروضة للبيع",
+    "noItems": "لم تقم بنشر أي قطعة حتى الآن",
+    "addUsedItem": "إضافة قطعة جديدة"
+  },
+  "addUsedItemActivity": {
+    "title": "إضافة قطعة للبيع",
+    "titleText": "اسم القطعة:",
+    "price": "السعر:",
+    "quantity": "الكمية:",
+    "description": "معلومات حول القطعة:",
+    "contactInformation": "معلومات التواصل:",
+    "owner": "الاسم:",
+    "phone": "رقم الموبايل:",
+    "mainImage": "الصورة الرئيسية:",
+    "addImages": "إضافة صور أخرى",
+    "add": "إضافة",
+    "cancel": "إلغاء",
+    "sure": "تأكيد الخروج؟",
+    "granted": "تم منح السماح بالوصول إلى لكاميرا",
+    "denied": "تم منع الوصول إلى الكاميرا",
+    "wrong": "حدث خطأ، الرجاء المحاولة من جديد",
+    "titleVal": "الرجاء إدخال اسم القطعة",
+    "titleLength": "اسم القطعة يجب أن يكون 3 أحرف على الأقل",
+    "priceVal": "الرجاء إدخال سعر القطعة",
+    "quantityVal": "الرجاء إدخال الكمية",
+    "descriptionVal": "الرجاء إدخال معلومات حول القطعة",
+    "descriptionLength": "معلومات القطعة يجب أن يكون 3 حروف على الأقل",
+    "imageVal": "الرجاء اختيار صورة للقطعة",
+    "nameVal": "الرجاء إدخال معلومات التواصل",
+    "phoneVal": "الرجاء إدخال معلومات التواصل",
+    "added": "تمت إضافة القطعة بنجاح!",
+    "try": "الرجاء المحاولة مجدداً"
+  },
+  "makeOrderActivity": {
+    "title": "إضافة طلبية",
+    "next": "التالي",
+    "previous": "السابق",
+    "lessPrice": "مجموع سعر القطع ضمن الطلب يجب أن يكون 1000 ل.س على الأقل",
+    "lessItems": "قم باختيار عنصر واحد على الأقل",
+    "locationVal": "الرجاء اختيار موقع",
+    "phoneVal": "رقم موبايل غير صحيح",
+    "nameVal": "الرجاء إدخال الاسم",
+    "cartFragment": {
+      "title": "قم باختيار القطع و العروض التي تريدها",
+      "emptyCart": "سلة المشتريات فارغة الآن\nقم بإضافة قطع أو عروض إلى السلة لتقوم بإنشاء طلبية"
+    },
+    "locationFragment": {
+      "hintSearch": "الرجاء قم بإدخال عنوانك، مدينتك، الشارع",
+      "hint": "* قم بالضغط على المؤشر لإدخال معلومات إضافية\n* يمكن الضغط على الخريطة لتغيير العنوان"
+    },
+    "timeFragment": {
+      "title": "الرجاء اختيار الوقت الذي تتواجد فيه",
+      "from": "من الساعة",
+      "setFromTitle": "من الساعة",
+      "to": "إلى الساعة",
+      "setToTime": "إلى الساعة",
+      "setFromTime": "من الساعة"
+    },
+    "informationFragment": {
+      "title": "معلومات التواصل",
+      "name": "الاسم:",
+      "phone": "الموبايل",
+      "remark": "إضافات:"
+    },
+    "summaryFragment": {
+      "chosenItems": "القطع التي ترغب بها:",
+      "contactInfo": "معلومات التواصل:",
+      "name": "الاسم الكامل:",
+      "phone": "رقم الموبايل:",
+      "remark": "هل تود بإضافة شيء ما:",
+      "time": "الوقت المفضل لإرسال القطع:",
+      "location": "الموقع على الخريطة:",
+      "yourWallet": "استخدام محفظة المتجر",
+      "submit": "تأكيد الطلب",
+      "total": "السعر الكلي:",
+      "havePromoCode" : "لدي برومو كود",
+      "promoCode" : "برومو كود"
+    }
+  },
+  "OrderPreviewActivity": {
+    "orderInfo": "معلومات الطلب",
+    "chosenItems": "القطع الموجودة ضمن الطلب:",
+    "location": "الموقع على الخريطة:",
+    "preferableTime": "الوقت المفضل",
+    "contactInfo": "معلومات التواصل:",
+    "name": "الاسم:",
+    "phoneNumber": "رقم الموبايل:",
+    "remark": "إضافات:",
+    "cannotCancel": "لا يمكنك إلغاء هذا الطلب",
+    "alreadyCanceled": "هذا الطلب ملغى",
+    "fromWallet": "تم استخدام من محفظة المتجر:",
+    "code": "رقم الطلب:",
+    "tomorrow": "سيتم توصيل الطلب اليوم أو غداً",
+    "day": "يوم",
+    "days": "أيام",
+    "during": "سيتم توصيل القطع خلال",
+    "cancel": "إلغاء الطلب",
+    "date": "التاريخ",
+    "total" : "السعر الكلي"
+  },
+  "itemsList": {
+    "free": "مجاناً",
+    "price": "السعر:",
+    "total": "السعر الكلي:",
+    "oneItem": "عنصر واحد على الأقل",
+    "outStock": "غير متوافر حاليا ضمن المتجر",
+    "unpublish": "إلغاء عرض القطعة",
+    "publish": "عرض القطعة للجميع",
+    "changeQuantity": "تم تحديث الكمية بنجاح",
+    "itemRemoved": "تم حذف القطعة بنجاح",
+    "dayTB": "يوم ليصبح متوافراً",
+    "daysTB": "أيام ليصبح متوافراً"
+  },
+  "dialogs": {
+    "aboutUs": {
+      "title": "معلومات حول المتجر",
+      "message":  "تم البدأ بمتجر نافارا منذ عام 2016، نحن مهتمون ببيع القطع الالكترونية والأنظمة المدمجة، إضافة لذلك نحن نقدم مجموعة عروض واسعة ومجال واسع من القطع الالكترونية كالأردوينو والراسبيري، والحساسات، والمتورات ." ,
+      "button": "الرجوع"
+    },
+    "changeLanguage": {
+      "title": "تغيير لغة التطبيق",
+      "english": "اللغة الإنكليزية",
+      "arabic": "اللغة العربية",
+      "button": "تغيير"
+    },
+    "contactUS": {
+      "title": "التواصل معنا",
+      "name": "الإسم:",
+      "email": "البريد الإلكتروني:",
+      "message": "نص الرسالة:",
+      "button": "إرسال",
+      "enterName": "الرجاء إدخال الإسم",
+      "enterEmail": "الرجاء إدخال البريد الإلكتروني",
+      "checkEmail": "الرجاء التأكد من البريد الإلكتروني",
+      "enterMessage": "الرجاء إدخال نص الرسالة",
+      "sent": "تم إرسال رسالتك بنجاح",
+      "try": "الرجاء المحاولة مجدداً",
+      "noNet": "لا يوجد اتصال بالإنترنيت ، الرجاء المحاولة من جديد"
+    },
+    "chooseQuantity": {
+      "title": "اختيار الكمية",
+      "button": "إضافة إلى سلة المشتريات"
+    },
+    "changePassword": {
+      "title": "تعيير كلمة المرور",
+      "old": "كلمة المرور القديمة:",
+      "new": "كلمة المرور الجديدة:",
+      "repeatNew": "تأكيد كلمة المرور:",
+      "button": "تغيير"
+    },
+    "forgetPassword": {
+      "title": "طلب تغيير كلمة المرور",
+      "emailOrMobile": "البريد الإلكتروني أو رقم الموبايل:",
+      "email": "الإيميل",
+      "mobile": "رقم الموبايل",
+      "emailExample": "user@example.com",
+      "mobileExample": "9XXX-XXX-XXX",
+      "button": "إرسال طلب تغيير"
+    },
+    "resetPassword": {
+      "title": "تغيير كلمة المرور",
+      "emailOrMobile": "البريد الإلكتروني أو رقم الموبايل:",
+      "email": "الإيميل",
+      "mobile": "رقم الموبايل",
+      "emailHint": "user@example.com",
+      "mobileHint": "9XXX-XXX-XXX",
+      "button": "تغيير",
+      "incorrectEmail": "البريد الإلكتروني خاطئ",
+      "incorrectphone": "رقم الموبايل خاطئ",
+      "enterCode": "الرجاء إدخال الرمز المستقبل برسالة",
+      "enterPassword": "الرجاء إدخال كلمة المرور الجديدة",
+      "passwordValidation": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+      "changed": "تم تغيير كلمة المرور بنجاح",
+      "noNet": "لا يوجد اتصال بالإنترنيت ، الرجاء المحاولة من جديد",
+      "enterCodePassword": "الرجاء إدخال الرمز المستقبل\nوكلمة السر الجديدة هنا",
+      "code": "الرمز:",
+      "newPassword": "كلمة المرور الجديدة:",
+      "returnBTN": "العودة"
+    },
+    "addImage": {
+      "title": "إضافة صورة",
+      "take": "أخذ صورة من الكاميرا",
+      "select": "اختيار من معرض الصور"
+    },
+    "locationRemark": {
+      "title": "معلومات إضافية على العنوان",
+      "hint": "الطابق، محل قريب، ...",
+      "done": "تم"
+    },
+    "sure": {
+      "yes": "نعم",
+      "no": "لا",
+      "cancelOrder": "متأكد من إلغاء الطلبية?",
+      "removeFromCart": "هل أنت متأكد من أنك تريد حذف هذا العنصر من سلة المستريات?",
+      "unpublish": "هل أنت متأكد من إيقاف نشر القطعة?",
+      "republish": "هل أنت متأكد من إعادة نشر القطعة?",
+	"exit":"هل أنت متأكد من الخروج؟"
+    },
+    "allDone": {
+      "returnBTN": "العودة",
+      "addToCart": "تم إضافة القطعة إلى سلة المشتريات بنجاح",
+      "goToCart": "سلة المشتريات",
+      "orderSent": "تم تأكيد الطلب\nالخاص بك بنجاح",
+      "code": "كود الطلب:",
+      "done": "تم",
+      "email": "تم إرسال رسالة إلكترونية لتغيير كلمة المرور إلى",
+      "sms": "تم إرسال رسالة لتغيير كلمة المرور إلى",
+      "emailConf": "تم إرسال رسالة إلكترونية إلى",
+      "smsConf": "تم إراسل رسالة تأكيد إلى"
+    },
+    "quantity": {
+      "addToCart": "إضافة إلى سلة المشتريات",
+      "starNote": "* ملاحظة: "
+    },
+    "confirm": {
+      "title": "الرجاء تأكيد الحساب",
+      "confirmBTN": "تأكيد",
+      "returnBTN": "العودة",
+      "resend": "الرجاء إعادة إرسال المز",
+      "email": "الرجاء التأكد من صندوق الوارد ضمن حسابك الإلكتروني",
+      "resendEmail": "إعادة إرسال رسالة إلكترونية",
+      "resendCode": "إعادة إرسال الرمز",
+      "code": "الرجاء إعادة إدخال رمز التأكيد هنا",
+      "enterCode": "الرجاء إدخال الرمز المستقبل هنا",
+      "successfully": "تم تأكيد حسابك بنجاح",
+      "noInternet": " لا يوجد اتصال بالإنترنيت ، الرجاء المحاولة من جديد",
+      "incorrectCode": "رمز التعيل خاطئ الرجاء المحاولة من جديد"
+    }
+  },
+  "hints": {
+    "mainActivity" : {
+      "start" : "ابدأ",
+      "next" : "التالي",
+      "welcome" : "مرحباً بك في تطبيق متجر نافارا",
+      "locationHint" : "تعرف على موقعنا, تواصل معنا وقم بزيارة موقعنا الإلكتروني",
+      "itemsHint" : "من السهل إيجاد أي قطعة مع وجود العديد من اﻷصناف",
+      "offersHint" : "احصل على الهدايا والعروض من متجر نافارا اﻵن",
+      "profileHint" : "نقوم بتنظيم جميع معلوماتك الشخصية، سلة المشتريات والطلبات",
+      "orderHint" : "احصل على القطع التي ترغب إلى منزلك مع خدمة التوصيل المجاني",
+      "done" : "تم",
+      "settings" : "جميع إعدادات التطبيق تجدها في اﻷعلى"
+    },
+    "itemsActivity" : {
+      "search" : "بحث",
+      "categories" : "جميع اﻷصناف",
+      "next" : "التالي",
+      "searchHint" : "السهولة في إيجاد العناصر",
+      "done" : "تم",
+      "categoriesHint" : "جميع اﻷصناف هنا"
+    },
+    "itemsList" : {
+      "done" : "تم",
+      "next" : "التالي",
+      "price" : "600 ل.س",
+      "title" : "اسم العنصر",
+      "cashBack" : "100 ل.س",
+      "cartText" : "اضغط على سلة المشتريات ﻹضافة العنصر إلى سلتك",
+      "cashText" : "بعض العناصر تحوي مبلغ مسترد يضاف إلى محفظتك لدى المتجر"
+    }
+  }
+}
