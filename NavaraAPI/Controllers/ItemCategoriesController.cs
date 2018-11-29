@@ -27,7 +27,7 @@ namespace NavaraAPI.Controllers
         {
             try
             {
-                var data = _context.Set<ItemCategory>().ToList();
+                var data = _context.Set<ItemCategory>()?.Where(s=>!s.Name.Contains("Used Items")).ToList();
                 var json = new JsonResult(data.Select(x => new ViewModels.ItemCategoryModel()
                 {
                     ID = x.ID,

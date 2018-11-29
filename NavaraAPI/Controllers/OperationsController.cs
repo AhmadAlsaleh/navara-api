@@ -44,7 +44,11 @@ namespace NavaraAPI.Controllers
                     OrganiztaionName = a.Organiztaion.Name,
                     ContactName = a.Organiztaion.ContactName,
                     a.IsActive,
-                    a.SessionsNumber
+                    a.ContactNumber,
+                    a.Title2,
+                    a.Description2,
+                    a.SessionsNumber,
+                    a.ImagePath
                 }
                         );
                 if (Courses != null)
@@ -77,7 +81,11 @@ namespace NavaraAPI.Controllers
                     OrganiztaionName = a.Organiztaion.Name,
                     ContactName = a.Organiztaion.ContactName,
                     a.IsActive,
-                    a.SessionsNumber
+                    a.SessionsNumber,
+                     a.ContactNumber,
+                    a.Title2,
+                    a.Description2,
+                    a.ImagePath
                 }
                         );
                 if (Events != null)
@@ -97,7 +105,56 @@ namespace NavaraAPI.Controllers
             }
 
         }
+        [HttpGet]
+        public async Task<ActionResult> GetProjects()
+        {
+            try
+            {
+                var Projects = _Context.Set<Project>()?.Include(s => s.ProjectImages)
+                    ?.Include(s => s.ProjectItems)?
+                    .ThenInclude(s => s.Item)
+                    ?.ThenInclude(s=>s.ItemCategory)
+                    ?.Select(a => new
+                    {
+                        a.Name,
+                        a.Name2,
+                        a.Description,
+                        a.Description2,
+                        ProjectImages = a.ProjectImages.Select(s => s.ImagePath).ToList(),
+                        ProjectItems = a.ProjectItems.Select(x => new ItemBasicModel()
+                        {
+                            ID = x.Item.ID,
+                            Name = x.Item.Name,
+                            ShortDescription = x.Item.ShortDescription,
+                            ItemCategory = x.Item.ItemCategory.Name,
+                            Price = x.Item.Price,
+                            CashBack = x.Item.CashBack,
+                            Quantity = x.Item.Quantity,
+                            ItemCategoryID = x.Item.ItemCategoryID,
+                            ThumbnailImagePath = x.Item.ThumbnailImagePath,
+                            AccountID = x.Item.AccountID,
+                            IsEnable = x.Item.IsEnable,
+                            DaysToBeAvilable = x.Item.DaysToBeAvailable
+                        })
+                            
+                }
+                        );
+                if (Projects != null)
+                {
+                    return Json(Projects);
+                }
+                else
+                {
+                    return BadRequest("Empty");
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
 
+            }
+
+        }
         [HttpGet]
         public async Task<ActionResult> GetOrganiztaion()
         {

@@ -115,6 +115,35 @@ namespace NavaraAPI.Controllers
                 return BadRequest();
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> GetUsedITems()
+        {
+            try
+            {
+                var data = _context.Set<Item>().Include(x => x.ItemCategory)
+                    .Where(x => x.IsEnable == true&&x.ItemCategory.Name.Contains("Used Items")).ToList();
+                var json = new JsonResult(data.Select(x => new ItemBasicModel()
+                {
+                    ID = x.ID,
+                    Name = x.Name,
+                    ShortDescription = x.ShortDescription,
+                    ItemCategory = x.ItemCategory?.Name,
+                    Price = x.Price,
+                    CashBack = x.CashBack,
+                    Quantity = x.Quantity,
+                    ItemCategoryID = x.ItemCategoryID,
+                    ThumbnailImagePath = x.ThumbnailImagePath,
+                    AccountID = x.AccountID,
+                    IsEnable = x.IsEnable,
+                    DaysToBeAvilable = x.DaysToBeAvailable
+                }));
+                return json;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBasicByCategory(Guid id)

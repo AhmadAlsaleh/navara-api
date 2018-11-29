@@ -165,6 +165,36 @@ namespace NavaraAPI
             {
                 routes.MapHub<ChatHub>("/chatHub");
             });
+            //try
+            //{
+            //    var project = new Project
+            //    {
+            //        Name = "Test Project ",
+            //        Name2 = "مشروع تجريب",
+            //        Description = "this project for test and you dont need to see it so go away ",
+            //        Description2 = "هيدا المشروع للتجريب و انت ما بهمك يلا من هون",
+            //    };
+            //    var Image = new ProjectImage { ImagePath = "Images/Course/batota.jpeg" };
+            //    var Image2 = new ProjectImage { ImagePath = "Images/Course/batota.jpeg" };
+            //    var Image3 = new ProjectImage { ImagePath = "Images/Course/batota.jpeg" };
+            //    project.ProjectImages.Add(Image);
+            //    project.ProjectImages.Add(Image2);
+            //    project.ProjectImages.Add(Image3);
+            //    var itemes = Context.Items.Take(4).ToList();
+            //    foreach (var item in itemes)
+            //    {
+            //        project.ProjectItems.Add(new ProjectItem { ItemID = item.ID, ProjectID = project.ID });
+            //    }
+            //    Context.Projects.Add(project);
+            //    Context.SaveChanges();
+
+            //}
+            //catch (Exception ex)
+            //{
+
+    
+            //}
+           
         }
     }
 }
